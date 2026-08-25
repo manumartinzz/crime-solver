@@ -1,390 +1,198 @@
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crime Solver</title>
+:root {
+  --ink: #090b10;
+  --panel: #11151c;
+  --panel2: #171d26;
+  --line: #313a47;
+  --paper: #e9e2d4;
+  --gold: #d3a750;
+  --red: #c94945;
+  --muted: #9aa4af;
+}
 
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+* {
+  box-sizing: border-box;
+}
 
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="app-shell grain">
+body {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+  color: var(--paper);
+  background: var(--ink);
+}
 
-    <!-- 1. TELA DE SPLASH -->
-    <section id="splash-view" class="view active items-center justify-center p-6 text-center">
-      <div class="reveal relative z-10">
-        <div class="splash-lens mx-auto mb-7 flex h-28 w-28 items-center justify-center rounded-full border-4 border-[#d3a750] bg-[#171d26] shadow-[0_0_55px_rgba(211,167,80,.28)]">
-          <i data-lucide="search" class="h-14 w-14 text-[#e9e2d4]"></i>
-        </div>
-        <p class="mono mb-3 text-xs tracking-[.32em]">ARQUIVO CONFIDENCIAL Nº 001</p>
-        <h1 class="noir-title text-5xl font-bold">CRIME SOLVER</h1>
-        <p class="mt-3 text-sm tracking-[.16em] text-[#9aa4af]">INVESTIGAÇÃO &amp; MISTÉRIO</p>
-      </div>
-    </section>
+button, input, textarea, select {
+  font: inherit;
+}
 
-    <!-- 2. MENU INICIAL -->
-    <section id="menu-view" class="view flex-col">
-      <header class="flex items-center justify-between border-b border-[#2d3540] px-5 py-4 md:px-10">
-        <button type="button" onclick="showView('menu-view')" class="flex items-center gap-3 text-left">
-          <i data-lucide="search" class="h-6 w-6 text-[#d3a750]"></i>
-          <span class="noir-title font-bold">Crime Solver</span>
-        </button>
-        <button type="button" onclick="showView('profile-view')" class="flex items-center gap-3 rounded-full border border-[#3b4450] px-3 py-1.5 hover:border-[#d3a750]">
-          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#d3a750] text-sm font-bold text-[#11151c]">D</span>
-          <span id="top-level" class="mono text-xs text-[#d3a750]">NÍVEL 1</span>
-        </button>
-      </header>
-      <main class="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 py-10">
-        <div class="grid items-center gap-10 md:grid-cols-[1.15fr_.85fr]">
-          <div class="reveal">
-            <p class="mono mb-4 text-xs tracking-[.24em] text-[#d3a750]">BEM-VINDO, DETETIVE</p>
-            <h1 class="noir-title max-w-xl text-5xl font-bold leading-tight md:text-6xl">Toda pista conta uma história.</h1>
-            <p class="mt-5 max-w-lg leading-7 text-[#aeb6c0]">Examine cenas de crime, interrogue suspeitos e reúna provas para desvendar cada caso. Cada pista encontrada te aproxima da verdade — e te dá experiência para evoluir como detetive.</p>
-            <div class="mt-7 max-w-md">
-              <div class="mb-2 flex justify-between mono text-[11px] text-[#aeb6c0]">
-                <span>EXPERIÊNCIA</span><span id="xp-label">0 / 100 XP</span>
-              </div>
-              <div class="h-2 overflow-hidden rounded-full bg-[#252c35]">
-                <div id="xp-bar" class="h-full w-0 rounded-full bg-[#d3a750] transition-all duration-500"></div>
-              </div>
-            </div>
-          </div>
-          <nav aria-label="Menu principal" class="reveal space-y-3" style="animation-delay:.15s">
-            <button type="button" onclick="showView('cases-view')" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left font-semibold">
-              <span>Jogar</span><i data-lucide="arrow-right" class="h-5 w-5 text-[#d3a750]"></i>
-            </button>
-            <button type="button" onclick="showView('cases-view')" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
-              <span>Casos</span><i data-lucide="folder-search-2" class="h-5 w-5 text-[#d3a750]"></i>
-            </button>
-            <button type="button" onclick="showView('achievements-view')" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
-              <span>Conquistas</span><i data-lucide="award" class="h-5 w-5 text-[#d3a750]"></i>
-            </button>
-            <button type="button" onclick="showView('settings-view')" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
-              <span>Configurações</span><i data-lucide="settings-2" class="h-5 w-5 text-[#d3a750]"></i>
-            </button>
-            <button type="button" onclick="showCredits()" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
-              <span>Créditos</span><i data-lucide="info" class="h-5 w-5 text-[#d3a750]"></i>
-            </button>
-          </nav>
-        </div>
-      </main>
-    </section>
+button {
+  cursor: pointer;
+}
 
-    <!-- 3. CASOS (lista dinâmica) -->
-    <section id="cases-view" class="view flex-col">
-      <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
-        <button type="button" onclick="showView('menu-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
-        <h1 class="noir-title text-3xl font-bold">Casos</h1>
-      </header>
-      <main class="mx-auto w-full max-w-5xl flex-1 px-5 py-9 md:px-10">
-        <p class="mb-7 text-[#aeb6c0]">Escolha um caso para começar sua investigação. Resolva um caso para desbloquear o próximo.</p>
-        <div id="cases-grid" class="grid gap-5 md:grid-cols-2"></div>
-      </main>
-    </section>
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
 
-    <!-- 4. INTRODUÇÃO DO CASO -->
-    <section id="intro-view" class="view flex-col">
-      <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
-        <button type="button" onclick="showView('cases-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
-        <p id="intro-code" class="mono text-xs tracking-[.2em] text-[#d3a750]">INTRODUÇÃO DO CASO</p>
-      </header>
-      <main class="case-intro mx-auto grid w-full max-w-5xl gap-8 px-5 py-8 md:grid-cols-[.8fr_1.2fr] md:px-10">
-        <img id="victim-image" loading="lazy" class="h-80 w-full rounded-lg object-cover grayscale" alt="Foto da vítima">
-        <div>
-          <h1 id="intro-title" class="noir-title text-4xl font-bold"></h1>
-          <p id="intro-story" class="mt-5 leading-7 text-[#b5bdc6]"></p>
-          <dl class="mt-7 grid grid-cols-3 gap-3 border-y border-[#303944] py-5 text-sm">
-            <div>
-              <dt class="mono text-[10px] text-[#d3a750]">LOCAL</dt>
-              <dd id="intro-location" class="mt-1"></dd>
-            </div>
-            <div>
-              <dt class="mono text-[10px] text-[#d3a750]">DATA</dt>
-              <dd id="intro-date" class="mt-1"></dd>
-            </div>
-            <div>
-              <dt class="mono text-[10px] text-[#d3a750]">HORÁRIO</dt>
-              <dd id="intro-time" class="mt-1"></dd>
-            </div>
-          </dl>
-          <div class="mt-6 border-l-2 border-[#d3a750] bg-[#151a21] p-4">
-            <p class="mono text-[10px] text-[#d3a750]">OBJETIVO DA MISSÃO</p>
-            <p id="intro-objective" class="mt-2 text-sm text-[#cbd0d6]"></p>
-          </div>
-          <button type="button" onclick="startInvestigation()" class="mt-7 rounded bg-[#d3a750] px-5 py-3 font-bold text-[#11151c]">Começar Investigação</button>
-        </div>
-      </main>
-    </section>
+.app-shell {
+  width: 100%;
+  min-height: 100vh;
+  background: radial-gradient(circle at 75% 0%, #20202a 0%, #090b10 42%, #050608 100%);
+  overflow: hidden;
+}
 
-    <!-- 5. CENA DO CRIME -->
-    <section id="scene-view" class="view flex-col">
-      <header class="flex items-center justify-between border-b border-[#2d3540] px-4 py-3 md:px-8">
-        <button type="button" onclick="showView('cases-view')" aria-label="Sair da investigação" class="nav-action rounded px-2 py-1">
-          <i data-lucide="arrow-left" class="h-5 w-5"></i><span class="sr-only">Sair</span>
-        </button>
-        <div>
-          <p id="scene-code" class="mono text-[10px] text-[#d3a750]"></p>
-          <h1 id="scene-title" class="noir-title text-xl font-bold"></h1>
-        </div>
-        <div class="mono text-xs text-[#d3a750]"><span id="scene-xp">0</span> XP</div>
-      </header>
-      <main class="scene-layout grid flex-1 grid-cols-[1fr_300px] overflow-hidden">
-        <section class="relative min-h-[390px] overflow-hidden">
-          <img id="scene-image" loading="lazy" class="scene-photo absolute inset-0 h-full w-full object-cover" alt="Cena do crime">
-          <div class="absolute inset-0 bg-gradient-to-t from-[#080a0e] via-transparent to-transparent"></div>
-          <div id="evidence-hotspots"></div>
-          <div class="absolute bottom-5 left-5 right-5">
-            <p id="scene-hint" class="inline-block rounded bg-[#090b10cc] px-4 py-2 text-sm text-[#d8dde3]"></p>
-          </div>
-        </section>
-        <aside class="border-l border-[#2d3540] bg-[#10141a] p-5">
-          <p class="mono text-[10px] text-[#9aa4af]">EVIDÊNCIAS ENCONTRADAS</p>
-          <p id="evidence-count" class="noir-title mt-1 text-4xl text-[#d3a750]">0/3</p>
-          <div id="found-list" class="mt-7 space-y-3"></div>
-        </aside>
-      </main>
-      <nav aria-label="Ferramentas da investigação" class="grid grid-cols-5 border-t border-[#2d3540] bg-[#0c0f14]">
-        <button type="button" onclick="showToast('Selecione uma evidência brilhante na cena.')" class="nav-action p-3 text-center text-xs">
-          <i data-lucide="search" class="mx-auto mb-1 h-4"></i><span>Examinar</span>
-        </button>
-        <button type="button" onclick="showPanel('inventory-panel')" class="nav-action p-3 text-center text-xs">
-          <i data-lucide="briefcase-business" class="mx-auto mb-1 h-4"></i><span>Inventário</span>
-        </button>
-        <button type="button" onclick="showPanel('suspects-panel')" class="nav-action p-3 text-center text-xs">
-          <i data-lucide="users-round" class="mx-auto mb-1 h-4"></i><span>Suspeitos</span>
-        </button>
-        <button type="button" onclick="showPanel('files-panel')" class="nav-action p-3 text-center text-xs">
-          <i data-lucide="folder-open" class="mx-auto mb-1 h-4"></i><span>Arquivos</span>
-        </button>
-        <button type="button" onclick="showView('solve-view')" class="nav-action p-3 text-center text-xs">
-          <i data-lucide="scale" class="mx-auto mb-1 h-4"></i><span>Resolver</span>
-        </button>
-      </nav>
-    </section>
+.view {
+  display: none;
+  width: 100%;
+  min-height: 100vh;
+}
 
-    <!-- 12. RESOLVER CASO -->
-    <section id="solve-view" class="view flex-col">
-      <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
-        <button type="button" onclick="showView('scene-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
-        <h1 class="noir-title text-3xl font-bold">Resolver o Caso</h1>
-      </header>
-      <main class="mx-auto w-full max-w-2xl px-5 py-8">
-        <p class="mb-7 text-[#aeb6c0]">Com base nas provas e nos interrogatórios, aponte o culpado, a arma e o motivo do crime.</p>
-        <form id="solve-form" class="space-y-6">
-          <div>
-            <label for="killer" class="mono text-xs text-[#d3a750]">QUEM MATOU?</label>
-            <select id="killer" class="mt-2 w-full rounded border border-[#394350] bg-[#151a21] p-3 text-[#e9e2d4]">
-              <option value="">Selecione uma pessoa</option>
-            </select>
-          </div>
-          <div>
-            <label for="weapon" class="mono text-xs text-[#d3a750]">QUAL FOI A ARMA?</label>
-            <select id="weapon" class="mt-2 w-full rounded border border-[#394350] bg-[#151a21] p-3 text-[#e9e2d4]">
-              <option value="">Selecione uma arma</option>
-            </select>
-          </div>
-          <div>
-            <label for="motive" class="mono text-xs text-[#d3a750]">QUAL O MOTIVO?</label>
-            <select id="motive" class="mt-2 w-full rounded border border-[#394350] bg-[#151a21] p-3 text-[#e9e2d4]">
-              <option value="">Selecione um motivo</option>
-            </select>
-          </div>
-          <button type="submit" class="rounded bg-[#d3a750] px-5 py-3 font-bold text-[#11151c]">Confirmar Acusação</button>
-          <p id="solve-feedback" class="hidden text-sm text-[#e77971]" aria-live="polite"></p>
-        </form>
-      </main>
-    </section>
+.view.active {
+  display: flex;
+}
 
-    <!-- 13. RESULTADO -->
-    <section id="result-view" class="view items-center justify-center p-5 text-center">
-      <main class="reveal max-w-xl rounded-xl border border-[#4b3b25] bg-[#151a21] p-8 shadow-2xl">
-        <i id="result-icon" data-lucide="badge-check" class="mx-auto h-14 w-14 text-[#d3a750]"></i>
-        <p class="mono mt-5 text-xs tracking-[.22em] text-[#d3a750]">RESULTADO</p>
-        <h1 id="result-heading" class="noir-title mt-3 text-4xl font-bold">CASO RESOLVIDO</h1>
-        <p id="result-copy" class="mt-4 text-[#b5bdc6]"></p>
-        <div class="my-6 text-3xl tracking-[.15em] text-[#d3a750]">★★★★★</div>
-        <div class="grid grid-cols-3 border-y border-[#35404c] py-5 text-sm">
-          <div>
-            <p class="mono text-[10px] text-[#9aa4af]">PISTAS</p>
-            <p id="result-clues" class="mt-1 font-bold">0/3</p>
-          </div>
-          <div>
-            <p class="mono text-[10px] text-[#9aa4af]">PRECISÃO</p>
-            <p id="result-accuracy" class="mt-1 font-bold">100%</p>
-          </div>
-          <div>
-            <p class="mono text-[10px] text-[#9aa4af]">XP</p>
-            <p id="result-xp" class="mt-1 font-bold">+150</p>
-          </div>
-        </div>
-        <button type="button" onclick="showView('cases-view')" class="mt-7 rounded bg-[#d3a750] px-5 py-3 font-bold text-[#11151c]">Voltar aos Casos</button>
-      </main>
-    </section>
+.noir-title {
+  font-family: "Playfair Display", serif;
+  letter-spacing: .04em;
+}
 
-    <!-- 14. CONQUISTAS -->
-    <section id="achievements-view" class="view flex-col">
-      <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
-        <button type="button" onclick="showView('menu-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
-        <h1 class="noir-title text-3xl font-bold">Conquistas</h1>
-      </header>
-      <main class="mx-auto w-full max-w-4xl px-5 py-8">
-        <div class="grid gap-4 md:grid-cols-3">
-          <article class="rounded-lg border border-[#4b3b25] bg-[#171d26] p-5">
-            <i data-lucide="fingerprint" class="text-[#d3a750]"></i>
-            <h2 class="mt-4 font-bold">Primeiro Caso</h2>
-            <p class="mt-2 text-sm text-[#9aa4af]">Resolva sua primeira investigação.</p>
-          </article>
-          <article class="rounded-lg border border-[#303944] bg-[#171d26] p-5">
-            <i data-lucide="timer" class="text-[#d3a750]"></i>
-            <h2 class="mt-4 font-bold">Resolver em menos de 20 minutos</h2>
-            <p class="mt-2 text-sm text-[#9aa4af]">Conclua um caso rapidamente sem perder nenhuma pista.</p>
-          </article>
-          <article class="rounded-lg border border-[#303944] bg-[#171d26] p-5">
-            <i data-lucide="trophy" class="text-[#d3a750]"></i>
-            <h2 class="mt-4 font-bold">Mestre Investigador</h2>
-            <p class="mt-2 text-sm text-[#9aa4af]">Resolva todos os 6 casos disponíveis.</p>
-          </article>
-        </div>
-      </main>
-    </section>
+.mono {
+  font-family: "Space Mono", monospace;
+}
 
-    <!-- 15. CONFIGURAÇÕES -->
-    <section id="settings-view" class="view flex-col">
-      <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
-        <button type="button" onclick="showView('menu-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
-        <h1 class="noir-title text-3xl font-bold">Configurações</h1>
-      </header>
-      <main class="mx-auto w-full max-w-xl px-5 py-8">
-        <div class="space-y-3">
-          <div class="flex items-center justify-between rounded-lg border border-[#303944] bg-[#151a21] p-4">
-            <div>
-              <p class="font-semibold">Música</p>
-              <p class="mt-1 text-sm text-[#9aa4af]">Ativa a trilha sonora ambiente do jogo.</p>
-            </div>
-            <button id="music-toggle" type="button" onclick="toggleSetting('music-toggle')" class="toggle-on h-7 w-12 rounded-full bg-[#3b4450] p-1">
-              <span class="block h-5 w-5 translate-x-5 rounded-full bg-white transition"></span>
-            </button>
-          </div>
-          <div class="flex items-center justify-between rounded-lg border border-[#303944] bg-[#151a21] p-4">
-            <div>
-              <p class="font-semibold">Vibração</p>
-              <p class="mt-1 text-sm text-[#9aa4af]">Feedback tátil ao interagir com evidências.</p>
-            </div>
-            <button id="vibration-toggle" type="button" onclick="toggleSetting('vibration-toggle')" class="toggle-on h-7 w-12 rounded-full bg-[#3b4450] p-1">
-              <span class="block h-5 w-5 translate-x-5 rounded-full bg-white transition"></span>
-            </button>
-          </div>
-        </div>
-        <button type="button" onclick="resetProgress()" class="mt-6 rounded border border-[#c94945] px-4 py-2 text-sm text-[#e79b96]">Reiniciar progresso</button>
-      </main>
-    </section>
+.grain {
+  position: relative;
+}
 
-    <!-- 16. PERFIL -->
-    <section id="profile-view" class="view flex-col">
-      <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
-        <button type="button" onclick="showView('menu-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
-        <h1 class="noir-title text-3xl font-bold">Perfil</h1>
-      </header>
-      <main class="mx-auto w-full max-w-3xl px-5 py-8">
-        <div class="rounded-xl border border-[#35404c] bg-[#151a21] p-6">
-          <div class="flex items-center gap-5">
-            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#d3a750] text-2xl font-bold text-[#11151c]">D</div>
-            <div>
-              <h2 id="profile-name" class="noir-title text-2xl font-bold">Detetive</h2>
-              <p id="profile-level" class="mono mt-1 text-xs text-[#d3a750]">NÍVEL 1</p>
-            </div>
-          </div>
-          <div class="mt-7 grid grid-cols-3 gap-3 border-t border-[#303944] pt-6 text-center">
-            <div>
-              <p id="profile-xp" class="text-xl font-bold">0</p>
-              <p class="mono mt-1 text-[10px] text-[#9aa4af]">XP TOTAL</p>
-            </div>
-            <div>
-              <p id="profile-cases" class="text-xl font-bold">0</p>
-              <p class="mono mt-1 text-[10px] text-[#9aa4af]">CASOS RESOLVIDOS</p>
-            </div>
-            <div>
-              <p id="profile-medals" class="text-xl font-bold">0</p>
-              <p class="mono mt-1 text-[10px] text-[#9aa4af]">MEDALHAS</p>
-            </div>
-          </div>
-        </div>
-      </main>
-    </section>
+.grain::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: .12;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  mix-blend-mode: soft-light;
+}
 
-    <!-- 6. MODAL EXAMINAR -->
-    <div id="evidence-modal" class="modal fixed inset-0 z-30 items-center justify-center bg-[#050608df] p-5">
-      <div class="w-full max-w-lg overflow-hidden rounded-xl border border-[#4a5461] bg-[#141920]">
-        <img id="evidence-image" class="h-48 w-full object-cover grayscale" alt="Evidência">
-        <div class="p-6">
-          <button type="button" onclick="closeModal()" class="float-right text-[#aeb6c0]" aria-label="Fechar"><i data-lucide="x"></i></button>
-          <p id="evidence-type" class="mono text-[10px] text-[#d3a750]"></p>
-          <h2 id="evidence-name" class="noir-title mt-2 text-3xl font-bold"></h2>
-          <p id="evidence-description" class="mt-4 leading-6 text-[#bac2ca]"></p>
-          <button id="collect-button" type="button" onclick="collectEvidence()" class="mt-6 rounded bg-[#d3a750] px-4 py-2 font-bold text-[#11151c]">Adicionar ao inventário</button>
-        </div>
-      </div>
-    </div>
+.reveal {
+  animation: reveal .55s both;
+}
 
-    <!-- 7. MODAL INVENTÁRIO -->
-    <div id="inventory-panel" class="modal fixed inset-0 z-30 items-center justify-center bg-[#050608df] p-5">
-      <div class="w-full max-w-xl rounded-xl border border-[#4a5461] bg-[#141920] p-6">
-        <button type="button" onclick="closePanel('inventory-panel')" class="float-right" aria-label="Fechar"><i data-lucide="x"></i></button>
-        <h2 class="noir-title text-3xl font-bold">Inventário</h2>
-        <p id="inventory-empty" class="mt-4 text-[#9aa4af]">Nenhuma prova coletada ainda.</p>
-        <div id="inventory-list" class="mt-5 space-y-3"></div>
-      </div>
-    </div>
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-    <!-- 8. MODAL SUSPEITOS -->
-    <div id="suspects-panel" class="modal fixed inset-0 z-30 items-center justify-center overflow-y-auto bg-[#050608df] p-5">
-      <div class="w-full max-w-4xl rounded-xl border border-[#4a5461] bg-[#141920] p-6">
-        <button type="button" onclick="closePanel('suspects-panel')" class="float-right" aria-label="Fechar"><i data-lucide="x"></i></button>
-        <h2 class="noir-title text-3xl font-bold">Suspeitos</h2>
-        <div id="suspects-grid" class="mt-6 grid gap-4 md:grid-cols-3"></div>
-      </div>
-    </div>
+.splash-lens {
+  animation: scan 2s ease-in-out infinite;
+}
 
-    <!-- 9. MODAL INTERROGATÓRIO -->
-    <div id="interrogation-panel" class="modal fixed inset-0 z-40 items-center justify-center bg-[#050608df] p-5">
-      <div class="w-full max-w-xl rounded-xl border border-[#4a5461] bg-[#141920] p-6">
-        <button type="button" onclick="closePanel('interrogation-panel')" class="float-right" aria-label="Fechar"><i data-lucide="x"></i></button>
-        <p class="mono text-[10px] text-[#d3a750]">INTERROGATÓRIO</p>
-        <h2 id="interrogation-name" class="noir-title mt-2 text-3xl font-bold"></h2>
-        <div id="chat-log" class="mt-5 min-h-24 space-y-3">
-          <p class="text-sm text-[#9aa4af]">Escolha uma pergunta para iniciar o interrogatório.</p>
-        </div>
-        <div id="question-list" class="mt-5 grid gap-2"></div>
-      </div>
-    </div>
+@keyframes scan {
+  0%, 100% { transform: rotate(-12deg) translateX(-7px); }
+  50% { transform: rotate(10deg) translateX(10px); }
+}
 
-    <!-- 10. MODAL ARQUIVOS -->
-    <div id="files-panel" class="modal fixed inset-0 z-30 items-center justify-center bg-[#050608df] p-5">
-      <div class="w-full max-w-xl rounded-xl border border-[#4a5461] bg-[#141920] p-6">
-        <button type="button" onclick="closePanel('files-panel')" class="float-right" aria-label="Fechar"><i data-lucide="x"></i></button>
-        <h2 class="noir-title text-3xl font-bold">Arquivos do Caso</h2>
-        <div id="files-list" class="mt-6 space-y-3"></div>
-      </div>
-    </div>
+.menu-button {
+  border: 1px solid #37404c;
+  background: rgba(21, 26, 34, .84);
+  transition: .2s;
+}
 
-    <!-- CRÉDITOS -->
-    <div id="credits-modal" class="modal fixed inset-0 z-40 items-center justify-center bg-[#050608df] p-5">
-      <div class="w-full max-w-md rounded-xl border border-[#4a5461] bg-[#141920] p-7 text-center">
-        <i data-lucide="search" class="mx-auto h-9 w-9 text-[#d3a750]"></i>
-        <h2 class="noir-title mt-4 text-3xl font-bold">Créditos</h2>
-        <p class="mt-4 leading-7 text-[#aeb6c0]">Crime Solver — projeto acadêmico desenvolvido para a disciplina de Banco de Dados do curso Técnico em Análise e Desenvolvimento de Sistemas.</p>
-        <button type="button" onclick="closePanel('credits-modal')" class="mt-6 rounded border border-[#d3a750] px-4 py-2">Fechar</button>
-      </div>
-    </div>
+.menu-button:hover {
+  border-color: var(--gold);
+  transform: translateX(5px);
+  background: #1d232c;
+}
 
-    <div id="toast" class="toast fixed bottom-5 left-1/2 z-50 -translate-x-1/2 rounded bg-[#d3a750] px-4 py-3 text-sm font-bold text-[#11151c]" aria-live="polite"></div>
-  </div>
+.case-card {
+  border: 1px solid #363f4b;
+  background: linear-gradient(135deg, #171d26, #0f131a);
+}
 
-  <script src="script.js"></script>
-</body>
-</html>
+.evidence-dot {
+  position: absolute;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 2px solid #f3d37a;
+  box-shadow: 0 0 0 7px rgba(211, 167, 80, .18), 0 0 20px rgba(211, 167, 80, .8);
+  animation: pulse 1.8s infinite;
+  background: transparent;
+}
+
+@keyframes pulse {
+  50% { transform: scale(1.15); opacity: .65; }
+}
+
+.scene-photo {
+  filter: brightness(.61) saturate(.58) contrast(1.12);
+}
+
+.nav-action {
+  color: #9aa4af;
+  transition: .2s;
+  background: transparent;
+  border: none;
+}
+
+.nav-action:hover,
+.nav-action.active {
+  color: #e9e2d4;
+  background: #252d38;
+}
+
+.modal {
+  display: none;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.toast {
+  transform: translateY(110px);
+  opacity: 0;
+  transition: .28s;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.answer {
+  border: 1px solid #404957;
+  background: #151a21;
+  transition: .18s;
+  color: var(--paper);
+}
+
+.answer:hover {
+  border-color: #d3a750;
+  background: #202733;
+}
+
+.answer.selected {
+  border-color: #d3a750;
+  background: #44391e;
+}
+
+.chat-bubble {
+  border-left: 2px solid var(--gold);
+  background: #181d25;
+}
+
+.toggle-on {
+  background: #d3a750 !important;
+}
+
+@media (max-width: 768px) {
+  .scene-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .case-intro {
+    grid-template-columns: 1fr !important;
+  }
+}
