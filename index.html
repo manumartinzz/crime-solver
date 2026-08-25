@@ -5,11 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crime Solver</title>
 
-  <!-- Tailwind (via CDN, ok para protótipo/projeto acadêmico) -->
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <!-- Ícones -->
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
@@ -78,34 +75,15 @@
       </main>
     </section>
 
-    <!-- 3. CASOS -->
+    <!-- 3. CASOS (lista dinâmica) -->
     <section id="cases-view" class="view flex-col">
       <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
         <button type="button" onclick="showView('menu-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
         <h1 class="noir-title text-3xl font-bold">Casos</h1>
       </header>
       <main class="mx-auto w-full max-w-5xl flex-1 px-5 py-9 md:px-10">
-        <p class="mb-7 text-[#aeb6c0]">Escolha um caso para começar sua investigação.</p>
-        <div class="grid gap-5 md:grid-cols-2">
-          <article class="case-card relative overflow-hidden rounded-xl p-6">
-            <p class="mono text-xs tracking-[.18em] text-[#d3a750]">CASO 001</p>
-            <h2 class="noir-title mt-3 text-3xl font-bold">O Assassinato do Empresário</h2>
-            <div class="mt-5 flex items-center justify-between">
-              <span class="rounded bg-[#542825] px-3 py-1 text-xs">Difícil</span>
-              <span class="text-[#d3a750]">★★★★★</span>
-            </div>
-            <div class="mt-6 flex items-center justify-between border-t border-[#343d49] pt-5">
-              <span id="case-status" class="mono text-xs text-[#aeb6c0]">EM INVESTIGAÇÃO</span>
-              <button type="button" onclick="showView('intro-view')" class="rounded bg-[#d3a750] px-4 py-2 text-sm font-bold text-[#11151c]">Investigar</button>
-            </div>
-          </article>
-          <article class="rounded-xl border border-[#262d36] bg-[#0d1015] p-6 opacity-60">
-            <i data-lucide="lock-keyhole" class="h-7 w-7 text-[#717b87]"></i>
-            <p class="mono mt-5 text-xs text-[#9aa4af]">CASO 002</p>
-            <h2 class="noir-title mt-3 text-2xl font-bold text-[#aeb6c0]">Segredos no Teatro</h2>
-            <p class="mt-5 text-sm text-[#7f8995]">Resolva o Caso 001 para desbloquear esta investigação.</p>
-          </article>
-        </div>
+        <p class="mb-7 text-[#aeb6c0]">Escolha um caso para começar sua investigação. Resolva um caso para desbloquear o próximo.</p>
+        <div id="cases-grid" class="grid gap-5 md:grid-cols-2"></div>
       </main>
     </section>
 
@@ -113,30 +91,30 @@
     <section id="intro-view" class="view flex-col">
       <header class="flex items-center gap-4 border-b border-[#2d3540] px-5 py-5 md:px-10">
         <button type="button" onclick="showView('cases-view')" aria-label="Voltar"><i data-lucide="arrow-left"></i></button>
-        <p class="mono text-xs tracking-[.2em] text-[#d3a750]">INTRODUÇÃO DO CASO</p>
+        <p id="intro-code" class="mono text-xs tracking-[.2em] text-[#d3a750]">INTRODUÇÃO DO CASO</p>
       </header>
       <main class="case-intro mx-auto grid w-full max-w-5xl gap-8 px-5 py-8 md:grid-cols-[.8fr_1.2fr] md:px-10">
-        <img loading="lazy" class="h-80 w-full rounded-lg object-cover grayscale" src="https://placehold.co/600x800/171d26/9aa4af?text=Vítima" alt="Foto da vítima">
+        <img id="victim-image" loading="lazy" class="h-80 w-full rounded-lg object-cover grayscale" alt="Foto da vítima">
         <div>
-          <h1 class="noir-title text-4xl font-bold">O Assassinato do Empresário</h1>
-          <p class="mt-5 leading-7 text-[#b5bdc6]">Eduardo Vilela, dono de uma grande construtora, foi encontrado morto em seu escritório. Não há sinais de arrombamento, o que sugere que a vítima conhecia seu assassino. A polícia isolou a cena e aguarda a chegada do detetive responsável pelo caso.</p>
+          <h1 id="intro-title" class="noir-title text-4xl font-bold"></h1>
+          <p id="intro-story" class="mt-5 leading-7 text-[#b5bdc6]"></p>
           <dl class="mt-7 grid grid-cols-3 gap-3 border-y border-[#303944] py-5 text-sm">
             <div>
               <dt class="mono text-[10px] text-[#d3a750]">LOCAL</dt>
-              <dd class="mt-1">Mansão Vilela</dd>
+              <dd id="intro-location" class="mt-1"></dd>
             </div>
             <div>
               <dt class="mono text-[10px] text-[#d3a750]">DATA</dt>
-              <dd class="mt-1">14/03/2024</dd>
+              <dd id="intro-date" class="mt-1"></dd>
             </div>
             <div>
               <dt class="mono text-[10px] text-[#d3a750]">HORÁRIO</dt>
-              <dd class="mt-1">23h12</dd>
+              <dd id="intro-time" class="mt-1"></dd>
             </div>
           </dl>
           <div class="mt-6 border-l-2 border-[#d3a750] bg-[#151a21] p-4">
             <p class="mono text-[10px] text-[#d3a750]">OBJETIVO DA MISSÃO</p>
-            <p class="mt-2 text-sm text-[#cbd0d6]">Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.</p>
+            <p id="intro-objective" class="mt-2 text-sm text-[#cbd0d6]"></p>
           </div>
           <button type="button" onclick="startInvestigation()" class="mt-7 rounded bg-[#d3a750] px-5 py-3 font-bold text-[#11151c]">Começar Investigação</button>
         </div>
@@ -150,30 +128,24 @@
           <i data-lucide="arrow-left" class="h-5 w-5"></i><span class="sr-only">Sair</span>
         </button>
         <div>
-          <p class="mono text-[10px] text-[#d3a750]">CASO 001</p>
-          <h1 class="noir-title text-xl font-bold">Cena do Crime</h1>
+          <p id="scene-code" class="mono text-[10px] text-[#d3a750]"></p>
+          <h1 id="scene-title" class="noir-title text-xl font-bold"></h1>
         </div>
         <div class="mono text-xs text-[#d3a750]"><span id="scene-xp">0</span> XP</div>
       </header>
       <main class="scene-layout grid flex-1 grid-cols-[1fr_300px] overflow-hidden">
         <section class="relative min-h-[390px] overflow-hidden">
-          <img loading="lazy" class="scene-photo absolute inset-0 h-full w-full object-cover" src="https://placehold.co/1200x800/11151c/313a47?text=Cena+do+Crime" alt="Cena do crime">
+          <img id="scene-image" loading="lazy" class="scene-photo absolute inset-0 h-full w-full object-cover" alt="Cena do crime">
           <div class="absolute inset-0 bg-gradient-to-t from-[#080a0e] via-transparent to-transparent"></div>
-          <button type="button" onclick="openEvidence('knife')" aria-label="Examinar faca" class="evidence-dot left-[30%] top-[58%]"></button>
-          <button type="button" onclick="openEvidence('letter')" aria-label="Examinar carta" class="evidence-dot left-[61%] top-[34%]"></button>
-          <button type="button" onclick="openEvidence('phone')" aria-label="Examinar celular" class="evidence-dot left-[76%] top-[68%]"></button>
+          <div id="evidence-hotspots"></div>
           <div class="absolute bottom-5 left-5 right-5">
-            <p class="inline-block rounded bg-[#090b10cc] px-4 py-2 text-sm text-[#d8dde3]">Toque nos pontos dourados para examinar evidências.</p>
+            <p id="scene-hint" class="inline-block rounded bg-[#090b10cc] px-4 py-2 text-sm text-[#d8dde3]"></p>
           </div>
         </section>
         <aside class="border-l border-[#2d3540] bg-[#10141a] p-5">
           <p class="mono text-[10px] text-[#9aa4af]">EVIDÊNCIAS ENCONTRADAS</p>
           <p id="evidence-count" class="noir-title mt-1 text-4xl text-[#d3a750]">0/3</p>
-          <div class="mt-7 space-y-3">
-            <div id="found-knife" class="hidden border-l border-[#d3a750] pl-3 text-sm text-[#c9d0d7]">Faca de cozinha</div>
-            <div id="found-letter" class="hidden border-l border-[#d3a750] pl-3 text-sm text-[#c9d0d7]">Carta rasgada</div>
-            <div id="found-phone" class="hidden border-l border-[#d3a750] pl-3 text-sm text-[#c9d0d7]">Celular da vítima</div>
-          </div>
+          <div id="found-list" class="mt-7 space-y-3"></div>
         </aside>
       </main>
       <nav aria-label="Ferramentas da investigação" class="grid grid-cols-5 border-t border-[#2d3540] bg-[#0c0f14]">
@@ -208,27 +180,18 @@
             <label for="killer" class="mono text-xs text-[#d3a750]">QUEM MATOU?</label>
             <select id="killer" class="mt-2 w-full rounded border border-[#394350] bg-[#151a21] p-3 text-[#e9e2d4]">
               <option value="">Selecione uma pessoa</option>
-              <option value="helena">Helena Duarte</option>
-              <option value="marcos">Marcos Vilela</option>
-              <option value="lucas">Lucas Prado</option>
             </select>
           </div>
           <div>
             <label for="weapon" class="mono text-xs text-[#d3a750]">QUAL FOI A ARMA?</label>
             <select id="weapon" class="mt-2 w-full rounded border border-[#394350] bg-[#151a21] p-3 text-[#e9e2d4]">
               <option value="">Selecione uma arma</option>
-              <option value="knife">Faca de cozinha</option>
-              <option value="gun">Revólver</option>
-              <option value="poison">Veneno</option>
             </select>
           </div>
           <div>
             <label for="motive" class="mono text-xs text-[#d3a750]">QUAL O MOTIVO?</label>
             <select id="motive" class="mt-2 w-full rounded border border-[#394350] bg-[#151a21] p-3 text-[#e9e2d4]">
               <option value="">Selecione um motivo</option>
-              <option value="inheritance">Herança e fraude financeira</option>
-              <option value="jealousy">Ciúmes</option>
-              <option value="robbery">Roubo</option>
             </select>
           </div>
           <button type="submit" class="rounded bg-[#d3a750] px-5 py-3 font-bold text-[#11151c]">Confirmar Acusação</button>
@@ -283,8 +246,8 @@
           </article>
           <article class="rounded-lg border border-[#303944] bg-[#171d26] p-5">
             <i data-lucide="trophy" class="text-[#d3a750]"></i>
-            <h2 class="mt-4 font-bold">Melhor Detetive</h2>
-            <p class="mt-2 text-sm text-[#9aa4af]">Encontre todas as pistas de um caso.</p>
+            <h2 class="mt-4 font-bold">Mestre Investigador</h2>
+            <p class="mt-2 text-sm text-[#9aa4af]">Resolva todos os 6 casos disponíveis.</p>
           </article>
         </div>
       </main>
@@ -317,6 +280,7 @@
             </button>
           </div>
         </div>
+        <button type="button" onclick="resetProgress()" class="mt-6 rounded border border-[#c94945] px-4 py-2 text-sm text-[#e79b96]">Reiniciar progresso</button>
       </main>
     </section>
 
@@ -356,7 +320,7 @@
     <!-- 6. MODAL EXAMINAR -->
     <div id="evidence-modal" class="modal fixed inset-0 z-30 items-center justify-center bg-[#050608df] p-5">
       <div class="w-full max-w-lg overflow-hidden rounded-xl border border-[#4a5461] bg-[#141920]">
-        <img id="evidence-image" class="h-48 w-full object-cover grayscale" src="https://placehold.co/600x300/11151c/313a47?text=Evidência" alt="Evidência">
+        <img id="evidence-image" class="h-48 w-full object-cover grayscale" alt="Evidência">
         <div class="p-6">
           <button type="button" onclick="closeModal()" class="float-right text-[#aeb6c0]" aria-label="Fechar"><i data-lucide="x"></i></button>
           <p id="evidence-type" class="mono text-[10px] text-[#d3a750]"></p>
@@ -382,32 +346,7 @@
       <div class="w-full max-w-4xl rounded-xl border border-[#4a5461] bg-[#141920] p-6">
         <button type="button" onclick="closePanel('suspects-panel')" class="float-right" aria-label="Fechar"><i data-lucide="x"></i></button>
         <h2 class="noir-title text-3xl font-bold">Suspeitos</h2>
-        <div class="mt-6 grid gap-4 md:grid-cols-3">
-          <article class="overflow-hidden rounded-lg border border-[#333d48]">
-            <img loading="lazy" class="h-36 w-full object-cover grayscale" src="https://placehold.co/300x200/171d26/9aa4af?text=Helena" alt="Helena Duarte">
-            <div class="p-4">
-              <h3 class="font-bold">Helena Duarte</h3>
-              <p class="mt-1 text-xs text-[#9aa4af]">34 anos · Sócia da empresa · Ex-parceira de negócios da vítima</p>
-              <button type="button" onclick="openInterrogation('Helena Duarte')" class="mt-4 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Interrogar</button>
-            </div>
-          </article>
-          <article class="overflow-hidden rounded-lg border border-[#333d48]">
-            <img loading="lazy" class="h-36 w-full object-cover grayscale" src="https://placehold.co/300x200/171d26/9aa4af?text=Marcos" alt="Marcos Vilela">
-            <div class="p-4">
-              <h3 class="font-bold">Marcos Vilela</h3>
-              <p class="mt-1 text-xs text-[#9aa4af]">41 anos · Irmão da vítima · Herdeiro da empresa</p>
-              <button type="button" onclick="openInterrogation('Marcos Vilela')" class="mt-4 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Interrogar</button>
-            </div>
-          </article>
-          <article class="overflow-hidden rounded-lg border border-[#333d48]">
-            <img loading="lazy" class="h-36 w-full object-cover grayscale" src="https://placehold.co/300x200/171d26/9aa4af?text=Lucas" alt="Lucas Prado">
-            <div class="p-4">
-              <h3 class="font-bold">Lucas Prado</h3>
-              <p class="mt-1 text-xs text-[#9aa4af]">28 anos · Motorista particular · Funcionário da vítima</p>
-              <button type="button" onclick="openInterrogation('Lucas Prado')" class="mt-4 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Interrogar</button>
-            </div>
-          </article>
-        </div>
+        <div id="suspects-grid" class="mt-6 grid gap-4 md:grid-cols-3"></div>
       </div>
     </div>
 
@@ -420,11 +359,7 @@
         <div id="chat-log" class="mt-5 min-h-24 space-y-3">
           <p class="text-sm text-[#9aa4af]">Escolha uma pergunta para iniciar o interrogatório.</p>
         </div>
-        <div class="mt-5 grid gap-2">
-          <button type="button" onclick="askQuestion('Onde você estava na noite do crime?')" class="answer rounded p-3 text-left text-sm">Onde você estava na noite do crime?</button>
-          <button type="button" onclick="askQuestion('Você conhecia a vítima?')" class="answer rounded p-3 text-left text-sm">Você conhecia a vítima?</button>
-          <button type="button" onclick="askQuestion('Confrontar com a carta encontrada.')" class="answer rounded p-3 text-left text-sm">Confrontar com a carta encontrada</button>
-        </div>
+        <div id="question-list" class="mt-5 grid gap-2"></div>
       </div>
     </div>
 
@@ -433,16 +368,7 @@
       <div class="w-full max-w-xl rounded-xl border border-[#4a5461] bg-[#141920] p-6">
         <button type="button" onclick="closePanel('files-panel')" class="float-right" aria-label="Fechar"><i data-lucide="x"></i></button>
         <h2 class="noir-title text-3xl font-bold">Arquivos do Caso</h2>
-        <div class="mt-6 space-y-3">
-          <article class="rounded border border-[#333d48] bg-[#10141a] p-4">
-            <p class="font-semibold">Relatório Policial</p>
-            <p class="mt-1 text-sm text-[#9aa4af]">Registro da chegada da polícia à cena, sem sinais de arrombamento nas portas ou janelas.</p>
-          </article>
-          <article class="rounded border border-[#333d48] bg-[#10141a] p-4">
-            <p class="font-semibold">Laudo Preliminar</p>
-            <p class="mt-1 text-sm text-[#9aa4af]">Óbito por ferimento perfurante, ocorrido entre 22h e 23h30 do dia do crime.</p>
-          </article>
-        </div>
+        <div id="files-list" class="mt-6 space-y-3"></div>
       </div>
     </div>
 
