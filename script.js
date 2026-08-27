@@ -20,15 +20,15 @@ const CASES = [
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Eduardo+Vilela",
-    sceneImage: "9UrwG.jpg",
+    sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Cena+do+Crime+001",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
     evidences: [
-      { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 28, y: 78,
+      { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 30, y: 58,
         description: "A lâmina contém manchas escuras. Uma análise posterior pode ligar a arma diretamente ao crime." },
-      { key: "letter", name: "Carta rasgada", type: "EVIDÊNCIA 02", x: 56, y: 70,
-        description: "Um bilhete rasgado, com uma ameaça escrita à mão: “Se sigues adelante, estás muerto. —AV”." },
-      { key: "phone", name: "Celular da vítima", type: "EVIDÊNCIA 03", x: 82, y: 61,
-        description: "O celular da vítima, com a tela trincada. A última ligação foi feita para Helena Duarte às 21h42." },
+      { key: "letter", name: "Carta rasgada", type: "EVIDÊNCIA 02", x: 61, y: 34,
+        description: "Uma ameaça escrita à mão: “Você vai pagar pelo que tirou de mim.” A assinatura foi removida." },
+      { key: "phone", name: "Celular da vítima", type: "EVIDÊNCIA 03", x: 76, y: 68,
+        description: "A última ligação foi feita para Helena Duarte às 21h42. O aparelho estava escondido sob uma poltrona." },
     ],
     suspects: [
       { id: "helena", name: "Helena Duarte", age: 34, profession: "Sócia da empresa", relation: "Ex-parceira de negócios da vítima", image: "Helena" },
@@ -408,6 +408,8 @@ const state = {
   currentSuspectId: null,
   interrogated: new Set(),
   startedAt: Date.now(),
+  musicOn: true,
+  vibrationOn: true,
 };
 
 function getCase(id) {
@@ -459,6 +461,114 @@ function showToast(text) {
   t.textContent = text;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+// =====================================================================
+// ÁUDIO AMBIENTE (gerado via Web Audio API — sem depender de nenhum
+// arquivo .mp3 externo). Cria um drone sombrio com duas camadas de
+// osciladores + um "chiado" filtrado de fundo, tudo controlado por um
+// nó de ganho mestre que o toggle de Música liga/desliga.
+// =====================================================================
+let audioCtx = null;
+let musicNodes = null;
+
+function initAudioContext() {
+  if (audioCtx) return;
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return;
+  audioCtx = new Ctx();
+}
+
+function buildAmbientMusic() {
+  const master = audioCtx.createGain();
+  master.gain.value = 0; // começa em silêncio, sobe suavemente em startMusic()
+  master.connect(audioCtx.destination);
+
+  // Camada de drone grave (acordes abertos, clima de suspense/noir)
+  const freqs = [55, 82.5, 110]; // A1, E2, A2
+  const oscillators = [];
+  freqs.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = f;
+    const oscGain = audioCtx.createGain();
+    oscGain.gain.value = 0.07 - i * 0.018;
+    osc.connect(oscGain);
+    oscGain.connect(master);
+    osc.start();
+    oscillators.push(osc);
+  });
+
+  // LFO lento modulando o volume mestre (efeito de "respiração")
+  const lfo = audioCtx.createOscillator();
+  lfo.type = "sine";
+  lfo.frequency.value = 0.07;
+  const lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 0.04;
+  lfo.connect(lfoGain);
+  lfoGain.connect(master.gain);
+  lfo.start();
+
+  // Textura de ruído filtrado (vento/tensão de fundo)
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = "lowpass";
+  noiseFilter.frequency.value = 380;
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.value = 0.02;
+
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(master);
+  noise.start();
+
+  return { master, oscillators, lfo, noise };
+}
+
+function startMusic() {
+  initAudioContext();
+  if (!audioCtx) return;
+  if (audioCtx.state === "suspended") audioCtx.resume();
+  if (!musicNodes) musicNodes = buildAmbientMusic();
+  setMusicVolume(state.musicOn);
+}
+
+function setMusicVolume(on) {
+  if (!musicNodes || !audioCtx) return;
+  const target = on ? 0.2 : 0;
+  musicNodes.master.gain.cancelScheduledValues(audioCtx.currentTime);
+  musicNodes.master.gain.linearRampToValueAtTime(target, audioCtx.currentTime + 0.7);
+}
+
+// Navegadores só permitem áudio após um gesto do usuário (clique/toque).
+// Este listener "arma" o início da música no primeiro toque na tela.
+function armMusicStart() {
+  const start = () => {
+    if (state.musicOn) startMusic();
+    document.removeEventListener("click", start);
+    document.removeEventListener("touchstart", start);
+  };
+  document.addEventListener("click", start, { once: true });
+  document.addEventListener("touchstart", start, { once: true });
+}
+
+// =====================================================================
+// VIBRAÇÃO — feedback tátil sempre que o jogador estiver ativo
+// (examinar/coletar evidência, confrontar suspeito, resolver o caso).
+// =====================================================================
+function vibrate(pattern) {
+  if (state.vibrationOn && "vibrate" in navigator) {
+    navigator.vibrate(pattern);
+  }
 }
 
 // =====================================================================
@@ -592,6 +702,7 @@ function openEvidence(key) {
   if (!item) return;
 
   state.currentEvidence = key;
+  vibrate(15); // pequeno toque ao examinar uma evidência
 
   document.getElementById("evidence-type").textContent = item.type;
   document.getElementById("evidence-name").textContent = item.name;
@@ -614,6 +725,7 @@ function collectEvidence() {
   state.found.add(key);
   renderFoundList();
   gainXP(25);
+  vibrate([20, 40, 20]); // confirmação tátil de que a prova entrou no inventário
   closeModal();
   showToast("Prova coletada: +25 XP");
   saveProgress();
@@ -676,6 +788,7 @@ function openInterrogation(suspectId) {
   const suspect = c.suspects.find((s) => s.id === suspectId);
   state.currentSuspectId = suspectId;
   state.interrogated.add(suspectId);
+  vibrate(15);
 
   document.getElementById("interrogation-name").textContent = suspect.name;
   document.getElementById("chat-log").innerHTML =
@@ -717,9 +830,11 @@ function askQuestion(type) {
   if (type === "where") {
     questionLabel = "Onde você estava na noite do crime?";
     reply = dialogue.where;
+    vibrate(15);
   } else if (type === "relation") {
     questionLabel = "Você conhecia a vítima?";
     reply = dialogue.relation;
+    vibrate(15);
   } else if (type === "confront") {
     const confrontEv = c.evidences.find((ev) => ev.key === dialogue.confrontEvidence);
     questionLabel = "Confrontar com: " + confrontEv.name;
@@ -728,7 +843,10 @@ function askQuestion(type) {
 
     if (hasEvidence) {
       gainXP(20);
+      vibrate([15, 40, 15, 40, 15]); // padrão mais forte: contradição encontrada
       showToast("Contradição registrada: +20 XP");
+    } else {
+      vibrate(15);
     }
   }
 
@@ -824,11 +942,13 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
   if (!correct) {
     feedback.textContent = "Algumas respostas não correspondem às evidências. Revise a investigação antes de acusar alguém.";
     feedback.classList.remove("hidden");
+    vibrate(80); // vibração única e longa = resposta incorreta
     return;
   }
 
   state.solvedCases[c.id] = true;
   gainXP(150);
+  vibrate([30, 60, 30, 60, 30]); // padrão comemorativo = caso resolvido
 
   document.getElementById("result-copy").textContent = c.resultText;
   document.getElementById("result-clues").textContent = state.found.size + "/" + c.evidences.length;
@@ -864,13 +984,48 @@ function updateProfile() {
 }
 
 // =====================================================================
-// CONFIGURAÇÕES
+// CONFIGURAÇÕES — toggles de Música e Vibração
 // =====================================================================
 function toggleSetting(id) {
   const el = document.getElementById(id);
-  el.classList.toggle("toggle-on");
+  const isOn = el.classList.toggle("toggle-on");
   el.querySelector("span").classList.toggle("translate-x-5");
+  el.setAttribute("aria-checked", String(isOn));
+
+  if (id === "music-toggle") {
+    state.musicOn = isOn;
+    startMusic(); // garante que o AudioContext já existe/está retomado
+    setMusicVolume(isOn);
+    showToast(isOn ? "Música ativada" : "Música desativada");
+  } else if (id === "vibration-toggle") {
+    state.vibrationOn = isOn;
+    showToast(isOn ? "Vibração ativada" : "Vibração desativada");
+    if (isOn) vibrate(20); // dá um toque de exemplo ao ligar
+  }
+
   saveProgress();
+}
+
+// Aplica o estado salvo (música/vibração) visualmente nos botões,
+// já que o HTML sempre nasce com os dois toggles ligados por padrão.
+function applySettingsUI() {
+  const musicEl = document.getElementById("music-toggle");
+  const vibrationEl = document.getElementById("vibration-toggle");
+
+  [
+    [musicEl, state.musicOn],
+    [vibrationEl, state.vibrationOn],
+  ].forEach(([el, isOn]) => {
+    if (!el) return;
+    el.classList.toggle("toggle-on", isOn);
+    el.setAttribute("aria-checked", String(isOn));
+    const knob = el.querySelector("span");
+    if (isOn) {
+      knob.classList.add("translate-x-5");
+    } else {
+      knob.classList.remove("translate-x-5");
+    }
+  });
 }
 
 function resetProgress() {
@@ -880,6 +1035,10 @@ function resetProgress() {
   state.solvedCases = {};
   state.found = new Set();
   state.interrogated = new Set();
+  state.musicOn = true;
+  state.vibrationOn = true;
+  applySettingsUI();
+  setMusicVolume(true);
   updateProfile();
   showToast("Progresso reiniciado.");
   showView("menu-view");
@@ -904,6 +1063,10 @@ function saveProgress() {
       found: [...state.found],
       interrogated: [...state.interrogated],
     },
+    settings: {
+      music_on: state.musicOn,
+      vibration_on: state.vibrationOn,
+    },
   };
 
   try {
@@ -921,6 +1084,11 @@ function loadProgress() {
     const record = JSON.parse(raw);
     state.xp = Number(record.xp) || 0;
     state.solvedCases = record.solved_cases || {};
+
+    if (record.settings) {
+      state.musicOn = record.settings.music_on !== false;
+      state.vibrationOn = record.settings.vibration_on !== false;
+    }
   } catch (e) {
     console.warn("Não foi possível carregar o progresso salvo.", e);
   }
@@ -932,7 +1100,9 @@ function loadProgress() {
 function init() {
   lucide.createIcons();
   loadProgress();
+  applySettingsUI();
   updateProfile();
+  armMusicStart();
   setTimeout(() => showView("menu-view"), 2000);
 }
 
