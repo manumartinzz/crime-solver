@@ -1,11 +1,4 @@
-// =====================================================================
-// BANCO DE CASOS
-// Cada caso funciona como um "registro" com todas as informações
-// necessárias para gerar a introdução, a cena, os suspeitos, o
-// interrogatório, os arquivos e a tela de solução daquele caso.
-// =====================================================================
-const CASES = [
-  {
+
     id: "caso001",
     code: "CASO 001",
     title: "O Assassinato do Empresário",
@@ -401,17 +394,24 @@ const CASES = [
 // =====================================================================
 const state = {
   xp: 0,
-  solvedCases: {}, // { caso001: true, caso002: true, ... }
+  solvedCases: {},
   currentCaseId: null,
   found: new Set(),
   currentEvidence: null,
   currentSuspectId: null,
   interrogated: new Set(),
   startedAt: Date.now(),
+<<<<<<< HEAD
+  musicEnabled: true,
+  vibrationEnabled: true,
+  musicStarted: false,
+=======
   musicOn: true,
   vibrationOn: true,
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 };
 
+<<<<<<< HEAD
 function getCase(id) {
   return CASES.find((c) => c.id === id);
 }
@@ -421,9 +421,95 @@ function getCurrentCase() {
 }
 
 function isUnlocked() {
-  // Todos os casos ficam liberados desde o início, independente
-  // de o jogador já ter resolvido os casos anteriores ou não.
   return true;
+}
+
+// =====================================================================
+// MÚSICA E VIBRAÇÃO
+// =====================================================================
+function getMusic() {
+  return document.getElementById("bg-music");
+}
+
+function tryPlayMusic() {
+  if (!state.musicEnabled) return;
+  const audio = getMusic();
+  if (!audio) return;
+
+  audio.volume = 0.32;
+  const playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise
+      .then(() => {
+        state.musicStarted = true;
+      })
+      .catch(() => {
+        // Autoplay bloqueado — aguarda próximo clique do usuário
+      });
+  }
+}
+
+function pauseMusic() {
+  const audio = getMusic();
+  if (audio) {
+    audio.pause();
+  }
+}
+
+function vibrate(pattern = [40, 30, 40]) {
+  if (!state.vibrationEnabled) return;
+  if (navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
+function updateToggleUI(id, enabled) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const knob = el.querySelector("span");
+  if (enabled) {
+    el.classList.add("toggle-on");
+    knob.classList.add("translate-x-5");
+  } else {
+    el.classList.remove("toggle-on");
+    knob.classList.remove("translate-x-5");
+  }
+}
+
+function toggleSetting(type) {
+  if (type === "music") {
+    state.musicEnabled = !state.musicEnabled;
+    updateToggleUI("music-toggle", state.musicEnabled);
+    if (state.musicEnabled) {
+      tryPlayMusic();
+    } else {
+      pauseMusic();
+    }
+  } else if (type === "vibration") {
+    state.vibrationEnabled = !state.vibrationEnabled;
+    updateToggleUI("vibration-toggle", state.vibrationEnabled);
+    if (state.vibrationEnabled) {
+      vibrate([30, 20, 30]); // feedback imediato ao ligar
+    }
+  }
+  saveProgress();
+}
+
+// Inicia a música no primeiro toque/clique do usuário (necessário por política dos navegadores)
+function setupMusicUnlock() {
+  const unlock = () => {
+    if (state.musicEnabled && !state.musicStarted) {
+      tryPlayMusic();
+    }
+    document.removeEventListener("click", unlock);
+    document.removeEventListener("touchstart", unlock);
+  };
+  document.addEventListener("click", unlock, { once: true });
+  document.addEventListener("touchstart", unlock, { once: true });
+=======
+function getCase(id) {
+  return CASES.find((c) => c.id === id);
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 }
 
 // =====================================================================
@@ -434,6 +520,10 @@ function showView(id) {
   document.getElementById(id).classList.add("active");
   if (id === "cases-view") renderCasesList();
   if (id === "profile-view") updateProfile();
+  if (id === "settings-view") {
+    updateToggleUI("music-toggle", state.musicEnabled);
+    updateToggleUI("vibration-toggle", state.vibrationEnabled);
+  }
   window.scrollTo(0, 0);
 }
 
@@ -644,6 +734,7 @@ function openCase(caseId) {
   document.getElementById("intro-objective").textContent = c.objective;
 
   showView("intro-view");
+  vibrate([25]);
 }
 
 // =====================================================================
@@ -674,6 +765,8 @@ function startInvestigation() {
   updateProfile();
   showView("scene-view");
   showToast("Investigação iniciada. Procure os pontos dourados.");
+  vibrate([40, 30, 60]);
+  tryPlayMusic();
 }
 
 function renderFoundList() {
@@ -716,6 +809,10 @@ function openEvidence(key) {
   btn.classList.toggle("opacity-50", already);
 
   document.getElementById("evidence-modal").classList.add("open");
+<<<<<<< HEAD
+  vibrate([20]);
+=======
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 }
 
 function collectEvidence() {
@@ -728,6 +825,7 @@ function collectEvidence() {
   vibrate([20, 40, 20]); // confirmação tátil de que a prova entrou no inventário
   closeModal();
   showToast("Prova coletada: +25 XP");
+  vibrate([50, 30, 80]);
   saveProgress();
 }
 
@@ -816,6 +914,7 @@ function openInterrogation(suspectId) {
   });
 
   showPanel("interrogation-panel");
+  vibrate([25]);
   saveProgress();
 }
 
@@ -843,10 +942,18 @@ function askQuestion(type) {
 
     if (hasEvidence) {
       gainXP(20);
+<<<<<<< HEAD
+=======
       vibrate([15, 40, 15, 40, 15]); // padrão mais forte: contradição encontrada
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
       showToast("Contradição registrada: +20 XP");
+      vibrate([60, 40, 80]);
     } else {
+<<<<<<< HEAD
+      vibrate([30]);
+=======
       vibrate(15);
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
     }
   }
 
@@ -915,8 +1022,6 @@ function populateSolveForm() {
   document.getElementById("solve-feedback").classList.add("hidden");
 }
 
-// Repopula o formulário sempre que o jogador abre a tela de resolução,
-// já que cada caso tem suspeitos, armas e motivos diferentes.
 document.addEventListener("DOMContentLoaded", () => {
   const solveNavButtons = document.querySelectorAll('[onclick*="solve-view"]');
   solveNavButtons.forEach((btn) => {
@@ -942,13 +1047,20 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
   if (!correct) {
     feedback.textContent = "Algumas respostas não correspondem às evidências. Revise a investigação antes de acusar alguém.";
     feedback.classList.remove("hidden");
+<<<<<<< HEAD
+    vibrate([80, 50, 80, 50, 80]);
+=======
     vibrate(80); // vibração única e longa = resposta incorreta
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
     return;
   }
 
   state.solvedCases[c.id] = true;
   gainXP(150);
+<<<<<<< HEAD
+=======
   vibrate([30, 60, 30, 60, 30]); // padrão comemorativo = caso resolvido
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 
   document.getElementById("result-copy").textContent = c.resultText;
   document.getElementById("result-clues").textContent = state.found.size + "/" + c.evidences.length;
@@ -958,6 +1070,7 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
 
   saveProgress();
   showView("result-view");
+  vibrate([40, 30, 40, 30, 100]);
 });
 
 // =====================================================================
@@ -986,6 +1099,8 @@ function updateProfile() {
 // =====================================================================
 // CONFIGURAÇÕES — toggles de Música e Vibração
 // =====================================================================
+<<<<<<< HEAD
+=======
 function toggleSetting(id) {
   const el = document.getElementById(id);
   const isOn = el.classList.toggle("toggle-on");
@@ -1028,6 +1143,7 @@ function applySettingsUI() {
   });
 }
 
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 function resetProgress() {
   if (!confirm("Tem certeza que deseja apagar todo o seu progresso?")) return;
   localStorage.removeItem("crimeSolverProgress");
@@ -1035,10 +1151,18 @@ function resetProgress() {
   state.solvedCases = {};
   state.found = new Set();
   state.interrogated = new Set();
+<<<<<<< HEAD
+  state.musicEnabled = true;
+  state.vibrationEnabled = true;
+  updateToggleUI("music-toggle", true);
+  updateToggleUI("vibration-toggle", true);
+  tryPlayMusic();
+=======
   state.musicOn = true;
   state.vibrationOn = true;
   applySettingsUI();
   setMusicVolume(true);
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
   updateProfile();
   showToast("Progresso reiniciado.");
   showView("menu-view");
@@ -1047,10 +1171,6 @@ function resetProgress() {
 // =====================================================================
 // PERSISTÊNCIA (localStorage)
 // =====================================================================
-// Obs.: para um projeto de Banco de Dados "de verdade", esta função é o
-// ponto onde entraria uma chamada a uma API/backend conectada ao seu
-// banco de dados (ex.: fetch('/api/progresso', { method:'POST', ... })).
-// Por enquanto, o progresso é salvo localmente no navegador do jogador.
 function saveProgress() {
   const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
   const record = {
@@ -1063,10 +1183,15 @@ function saveProgress() {
       found: [...state.found],
       interrogated: [...state.interrogated],
     },
+<<<<<<< HEAD
+    music_enabled: state.musicEnabled,
+    vibration_enabled: state.vibrationEnabled,
+=======
     settings: {
       music_on: state.musicOn,
       vibration_on: state.vibrationOn,
     },
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
   };
 
   try {
@@ -1084,11 +1209,20 @@ function loadProgress() {
     const record = JSON.parse(raw);
     state.xp = Number(record.xp) || 0;
     state.solvedCases = record.solved_cases || {};
+<<<<<<< HEAD
+    if (typeof record.music_enabled === "boolean") {
+      state.musicEnabled = record.music_enabled;
+    }
+    if (typeof record.vibration_enabled === "boolean") {
+      state.vibrationEnabled = record.vibration_enabled;
+    }
+=======
 
     if (record.settings) {
       state.musicOn = record.settings.music_on !== false;
       state.vibrationOn = record.settings.vibration_on !== false;
     }
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
   } catch (e) {
     console.warn("Não foi possível carregar o progresso salvo.", e);
   }
@@ -1102,8 +1236,24 @@ function init() {
   loadProgress();
   applySettingsUI();
   updateProfile();
+<<<<<<< HEAD
+  updateToggleUI("music-toggle", state.musicEnabled);
+  updateToggleUI("vibration-toggle", state.vibrationEnabled);
+  setupMusicUnlock();
+
+  // Volume baixo por padrão
+  const audio = getMusic();
+  if (audio) audio.volume = 0.32;
+
+  setTimeout(() => {
+    showView("menu-view");
+    // Tenta tocar após o splash (pode ser bloqueado, mas o unlock de clique resolve)
+    if (state.musicEnabled) tryPlayMusic();
+  }, 2000);
+=======
   armMusicStart();
   setTimeout(() => showView("menu-view"), 2000);
+>>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 }
 
 init();
