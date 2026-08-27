@@ -873,6 +873,23 @@ function toggleSetting(id) {
   saveProgress();
 }
 
+<script>
+    const musica = document.getElementById("musicaAmbiente");
+    const botao = document.getElementById("botaoMusica");
+
+    musica.volume = 0.25;
+
+    botao.addEventListener("click", () => {
+        if (musica.paused) {
+            musica.play();
+            botao.textContent = "🔊 Música";
+        } else {
+            musica.pause();
+            botao.textContent = "🔇 Música";
+        }
+    });
+</script>
+
 function resetProgress() {
   if (!confirm("Tem certeza que deseja apagar todo o seu progresso?")) return;
   localStorage.removeItem("crimeSolverProgress");

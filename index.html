@@ -64,6 +64,30 @@
             <button type="button" onclick="showView('settings-view')" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
               <span>Configurações</span><i data-lucide="settings-2" class="h-5 w-5 text-[#d3a750]"></i>
             </button>
+
+            <audio id="musicaAmbiente" loop>
+    <source src="musica.mp3" type="audio/mpeg">
+</audio>
+
+<button id="botaoMusica">🔊 Música</button>
+
+<script>
+    const musica = document.getElementById("musicaAmbiente");
+    const botao = document.getElementById("botaoMusica");
+
+    musica.volume = 0.25;
+
+    botao.addEventListener("click", () => {
+        if (musica.paused) {
+            musica.play();
+            botao.textContent = "🔊 Música";
+        } else {
+            musica.pause();
+            botao.textContent = "🔇 Música";
+        }
+    });
+</script>
+
             <button type="button" onclick="showCredits()" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
               <span>Créditos</span><i data-lucide="info" class="h-5 w-5 text-[#d3a750]"></i>
             </button>
