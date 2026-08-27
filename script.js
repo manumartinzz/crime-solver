@@ -20,15 +20,15 @@ const CASES = [
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Eduardo+Vilela",
-    sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Cena+do+Crime+001",
+    sceneImage: "assets/caso001-cena.jpg",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
     evidences: [
-      { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 30, y: 58,
+      { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 28, y: 78,
         description: "A lâmina contém manchas escuras. Uma análise posterior pode ligar a arma diretamente ao crime." },
-      { key: "letter", name: "Carta rasgada", type: "EVIDÊNCIA 02", x: 61, y: 34,
-        description: "Uma ameaça escrita à mão: “Você vai pagar pelo que tirou de mim.” A assinatura foi removida." },
-      { key: "phone", name: "Celular da vítima", type: "EVIDÊNCIA 03", x: 76, y: 68,
-        description: "A última ligação foi feita para Helena Duarte às 21h42. O aparelho estava escondido sob uma poltrona." },
+      { key: "letter", name: "Carta rasgada", type: "EVIDÊNCIA 02", x: 56, y: 70,
+        description: "Um bilhete rasgado, com uma ameaça escrita à mão: “Se sigues adelante, estás muerto. —AV”." },
+      { key: "phone", name: "Celular da vítima", type: "EVIDÊNCIA 03", x: 82, y: 61,
+        description: "O celular da vítima, com a tela trincada. A última ligação foi feita para Helena Duarte às 21h42." },
     ],
     suspects: [
       { id: "helena", name: "Helena Duarte", age: 34, profession: "Sócia da empresa", relation: "Ex-parceira de negócios da vítima", image: "Helena" },
