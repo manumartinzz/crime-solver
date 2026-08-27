@@ -20,15 +20,15 @@ const CASES = [
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Eduardo+Vilela",
-    sceneImage: "assets/caso001-cena.jpg",
+    sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Cena+do+Crime+001",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
     evidences: [
-      { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 28, y: 78,
+      { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 30, y: 58,
         description: "A lâmina contém manchas escuras. Uma análise posterior pode ligar a arma diretamente ao crime." },
-      { key: "letter", name: "Carta rasgada", type: "EVIDÊNCIA 02", x: 56, y: 70,
-        description: "Um bilhete rasgado, com uma ameaça escrita à mão: “Se sigues adelante, estás muerto. —AV”." },
-      { key: "phone", name: "Celular da vítima", type: "EVIDÊNCIA 03", x: 82, y: 61,
-        description: "O celular da vítima, com a tela trincada. A última ligação foi feita para Helena Duarte às 21h42." },
+      { key: "letter", name: "Carta rasgada", type: "EVIDÊNCIA 02", x: 61, y: 34,
+        description: "Uma ameaça escrita à mão: “Você vai pagar pelo que tirou de mim.” A assinatura foi removida." },
+      { key: "phone", name: "Celular da vítima", type: "EVIDÊNCIA 03", x: 76, y: 68,
+        description: "A última ligação foi feita para Helena Duarte às 21h42. O aparelho estava escondido sob uma poltrona." },
     ],
     suspects: [
       { id: "helena", name: "Helena Duarte", age: 34, profession: "Sócia da empresa", relation: "Ex-parceira de negócios da vítima", image: "Helena" },
@@ -408,7 +408,158 @@ const state = {
   currentSuspectId: null,
   interrogated: new Set(),
   startedAt: Date.now(),
+  musicEnabled: true,
+  vibrationEnabled: true,
 };
+
+// =====================================================================
+// ÁUDIO AMBIENTE (Web Audio API - drone noir)
+// Gera uma trilha ambiente escura e misteriosa sem precisar de arquivo MP3.
+// =====================================================================
+let audioCtx = null;
+let ambientNodes = [];
+let ambientGain = null;
+let musicStarted = false;
+
+function initAmbientMusic() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    ambientGain = audioCtx.createGain();
+    ambientGain.gain.value = 0;
+    ambientGain.connect(audioCtx.destination);
+
+    // Drone principal (baixo e sombrio)
+    const osc1 = audioCtx.createOscillator();
+    osc1.type = "sine";
+    osc1.frequency.value = 55; // Lá1
+    const g1 = audioCtx.createGain();
+    g1.gain.value = 0.12;
+    osc1.connect(g1);
+    g1.connect(ambientGain);
+    osc1.start();
+
+    // Segundo harmônico (mistério)
+    const osc2 = audioCtx.createOscillator();
+    osc2.type = "triangle";
+    osc2.frequency.value = 82.5;
+    const g2 = audioCtx.createGain();
+    g2.gain.value = 0.06;
+    osc2.connect(g2);
+    g2.connect(ambientGain);
+    osc2.start();
+
+    // Terceiro tom (atmosférico, levemente desafinado)
+    const osc3 = audioCtx.createOscillator();
+    osc3.type = "sine";
+    osc3.frequency.value = 110.5;
+    const g3 = audioCtx.createGain();
+    g3.gain.value = 0.04;
+    osc3.connect(g3);
+    g3.connect(ambientGain);
+    osc3.start();
+
+    // LFO lento para variação (respiração)
+    const lfo = audioCtx.createOscillator();
+    lfo.type = "sine";
+    lfo.frequency.value = 0.08;
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.value = 0.015;
+    lfo.connect(lfoGain);
+    lfoGain.connect(g1.gain);
+    lfo.start();
+
+    ambientNodes = [osc1, osc2, osc3, lfo, g1, g2, g3, lfoGain];
+  } catch (e) {
+    console.warn("Áudio ambiente não disponível:", e);
+  }
+}
+
+function startMusic() {
+  if (!state.musicEnabled) return;
+  initAmbientMusic();
+  if (!audioCtx || !ambientGain) return;
+
+  // Navegadores exigem interação do usuário para iniciar áudio
+  if (audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => {});
+  }
+
+  const now = audioCtx.currentTime;
+  ambientGain.gain.cancelScheduledValues(now);
+  ambientGain.gain.setValueAtTime(ambientGain.gain.value, now);
+  ambientGain.gain.linearRampToValueAtTime(0.35, now + 2.5);
+  musicStarted = true;
+}
+
+function stopMusic() {
+  if (!ambientGain || !audioCtx) return;
+  const now = audioCtx.currentTime;
+  ambientGain.gain.cancelScheduledValues(now);
+  ambientGain.gain.setValueAtTime(ambientGain.gain.value, now);
+  ambientGain.gain.linearRampToValueAtTime(0, now + 1.2);
+}
+
+function toggleMusic() {
+  state.musicEnabled = !state.musicEnabled;
+  const el = document.getElementById("music-toggle");
+  el.classList.toggle("toggle-on", state.musicEnabled);
+  el.querySelector("span").classList.toggle("translate-x-5", state.musicEnabled);
+  el.setAttribute("aria-pressed", state.musicEnabled ? "true" : "false");
+
+  if (state.musicEnabled) {
+    startMusic();
+    showToast("Música ambiente ativada");
+  } else {
+    stopMusic();
+    showToast("Música desativada");
+  }
+  saveProgress();
+}
+
+// =====================================================================
+// VIBRAÇÃO (Vibration API)
+// =====================================================================
+function vibrate(pattern = 30) {
+  if (!state.vibrationEnabled) return;
+  if (!navigator.vibrate) return;
+  try {
+    navigator.vibrate(pattern);
+  } catch (e) {
+    // silenciosamente ignora em dispositivos sem suporte
+  }
+}
+
+function toggleVibration() {
+  state.vibrationEnabled = !state.vibrationEnabled;
+  const el = document.getElementById("vibration-toggle");
+  el.classList.toggle("toggle-on", state.vibrationEnabled);
+  el.querySelector("span").classList.toggle("translate-x-5", state.vibrationEnabled);
+  el.setAttribute("aria-pressed", state.vibrationEnabled ? "true" : "false");
+
+  if (state.vibrationEnabled) {
+    vibrate([40, 30, 40]);
+    showToast("Vibração ativada");
+  } else {
+    showToast("Vibração desativada");
+  }
+  saveProgress();
+}
+
+function syncSettingsUI() {
+  const musicEl = document.getElementById("music-toggle");
+  const vibEl = document.getElementById("vibration-toggle");
+  if (musicEl) {
+    musicEl.classList.toggle("toggle-on", state.musicEnabled);
+    musicEl.querySelector("span").classList.toggle("translate-x-5", state.musicEnabled);
+    musicEl.setAttribute("aria-pressed", state.musicEnabled ? "true" : "false");
+  }
+  if (vibEl) {
+    vibEl.classList.toggle("toggle-on", state.vibrationEnabled);
+    vibEl.querySelector("span").classList.toggle("translate-x-5", state.vibrationEnabled);
+    vibEl.setAttribute("aria-pressed", state.vibrationEnabled ? "true" : "false");
+  }
+}
 
 function getCase(id) {
   return CASES.find((c) => c.id === id);
@@ -563,6 +714,8 @@ function startInvestigation() {
   renderFoundList();
   updateProfile();
   showView("scene-view");
+  startMusic();
+  vibrate(40);
   showToast("Investigação iniciada. Procure os pontos dourados.");
 }
 
@@ -605,6 +758,7 @@ function openEvidence(key) {
   btn.classList.toggle("opacity-50", already);
 
   document.getElementById("evidence-modal").classList.add("open");
+  vibrate(15);
 }
 
 function collectEvidence() {
@@ -615,6 +769,7 @@ function collectEvidence() {
   renderFoundList();
   gainXP(25);
   closeModal();
+  vibrate([25, 20, 40]);
   showToast("Prova coletada: +25 XP");
   saveProgress();
 }
@@ -728,7 +883,10 @@ function askQuestion(type) {
 
     if (hasEvidence) {
       gainXP(20);
+      vibrate([30, 20, 30, 20, 50]);
       showToast("Contradição registrada: +20 XP");
+    } else {
+      vibrate(20);
     }
   }
 
@@ -824,11 +982,13 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
   if (!correct) {
     feedback.textContent = "Algumas respostas não correspondem às evidências. Revise a investigação antes de acusar alguém.";
     feedback.classList.remove("hidden");
+    vibrate([80, 50, 80]);
     return;
   }
 
   state.solvedCases[c.id] = true;
   gainXP(150);
+  vibrate([50, 40, 50, 40, 80]);
 
   document.getElementById("result-copy").textContent = c.resultText;
   document.getElementById("result-clues").textContent = state.found.size + "/" + c.evidences.length;
@@ -866,12 +1026,7 @@ function updateProfile() {
 // =====================================================================
 // CONFIGURAÇÕES
 // =====================================================================
-function toggleSetting(id) {
-  const el = document.getElementById(id);
-  el.classList.toggle("toggle-on");
-  el.querySelector("span").classList.toggle("translate-x-5");
-  saveProgress();
-}
+// toggleSetting removido — agora usamos toggleMusic() e toggleVibration()
 
 function resetProgress() {
   if (!confirm("Tem certeza que deseja apagar todo o seu progresso?")) return;
@@ -900,6 +1055,8 @@ function saveProgress() {
     solved_cases: state.solvedCases,
     total_play_time: elapsed,
     current_case_id: state.currentCaseId,
+    music_enabled: state.musicEnabled,
+    vibration_enabled: state.vibrationEnabled,
     case_progress: {
       found: [...state.found],
       interrogated: [...state.interrogated],
@@ -921,6 +1078,8 @@ function loadProgress() {
     const record = JSON.parse(raw);
     state.xp = Number(record.xp) || 0;
     state.solvedCases = record.solved_cases || {};
+    if (typeof record.music_enabled === "boolean") state.musicEnabled = record.music_enabled;
+    if (typeof record.vibration_enabled === "boolean") state.vibrationEnabled = record.vibration_enabled;
   } catch (e) {
     console.warn("Não foi possível carregar o progresso salvo.", e);
   }
@@ -933,6 +1092,17 @@ function init() {
   lucide.createIcons();
   loadProgress();
   updateProfile();
+  syncSettingsUI();
+
+  // Inicia a música após a primeira interação do usuário (exigência dos navegadores)
+  const unlockAudio = () => {
+    startMusic();
+    document.removeEventListener("click", unlockAudio);
+    document.removeEventListener("touchstart", unlockAudio);
+  };
+  document.addEventListener("click", unlockAudio, { once: true });
+  document.addEventListener("touchstart", unlockAudio, { once: true });
+
   setTimeout(() => showView("menu-view"), 2000);
 }
 
