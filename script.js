@@ -20,7 +20,7 @@ const CASES = [
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Eduardo+Vilela",
-    sceneImage: "assets/cena001.jpg",
+    sceneImage: "9UrwG.jpg",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
     evidences: [
       { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 28, y: 78,
