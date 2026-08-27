@@ -418,9 +418,10 @@ function getCurrentCase() {
   return getCase(state.currentCaseId);
 }
 
-function isUnlocked(index) {
-  if (index === 0) return true;
-  return !!state.solvedCases[CASES[index - 1].id];
+function isUnlocked() {
+  // Todos os casos ficam liberados desde o início, independente
+  // de o jogador já ter resolvido os casos anteriores ou não.
+  return true;
 }
 
 // =====================================================================
