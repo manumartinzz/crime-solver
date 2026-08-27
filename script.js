@@ -1,4 +1,11 @@
-
+// =====================================================================
+// BANCO DE CASOS
+// Cada caso funciona como um "registro" com todas as informações
+// necessárias para gerar a introdução, a cena, os suspeitos, o
+// interrogatório, os arquivos e a tela de solução daquele caso.
+// =====================================================================
+const CASES = [
+  {
     id: "caso001",
     code: "CASO 001",
     title: "O Assassinato do Empresário",
@@ -394,24 +401,15 @@
 // =====================================================================
 const state = {
   xp: 0,
-  solvedCases: {},
+  solvedCases: {}, // { caso001: true, caso002: true, ... }
   currentCaseId: null,
   found: new Set(),
   currentEvidence: null,
   currentSuspectId: null,
   interrogated: new Set(),
   startedAt: Date.now(),
-<<<<<<< HEAD
-  musicEnabled: true,
-  vibrationEnabled: true,
-  musicStarted: false,
-=======
-  musicOn: true,
-  vibrationOn: true,
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 };
 
-<<<<<<< HEAD
 function getCase(id) {
   return CASES.find((c) => c.id === id);
 }
@@ -421,95 +419,9 @@ function getCurrentCase() {
 }
 
 function isUnlocked() {
+  // Todos os casos ficam liberados desde o início, independente
+  // de o jogador já ter resolvido os casos anteriores ou não.
   return true;
-}
-
-// =====================================================================
-// MÚSICA E VIBRAÇÃO
-// =====================================================================
-function getMusic() {
-  return document.getElementById("bg-music");
-}
-
-function tryPlayMusic() {
-  if (!state.musicEnabled) return;
-  const audio = getMusic();
-  if (!audio) return;
-
-  audio.volume = 0.32;
-  const playPromise = audio.play();
-  if (playPromise !== undefined) {
-    playPromise
-      .then(() => {
-        state.musicStarted = true;
-      })
-      .catch(() => {
-        // Autoplay bloqueado — aguarda próximo clique do usuário
-      });
-  }
-}
-
-function pauseMusic() {
-  const audio = getMusic();
-  if (audio) {
-    audio.pause();
-  }
-}
-
-function vibrate(pattern = [40, 30, 40]) {
-  if (!state.vibrationEnabled) return;
-  if (navigator.vibrate) {
-    navigator.vibrate(pattern);
-  }
-}
-
-function updateToggleUI(id, enabled) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const knob = el.querySelector("span");
-  if (enabled) {
-    el.classList.add("toggle-on");
-    knob.classList.add("translate-x-5");
-  } else {
-    el.classList.remove("toggle-on");
-    knob.classList.remove("translate-x-5");
-  }
-}
-
-function toggleSetting(type) {
-  if (type === "music") {
-    state.musicEnabled = !state.musicEnabled;
-    updateToggleUI("music-toggle", state.musicEnabled);
-    if (state.musicEnabled) {
-      tryPlayMusic();
-    } else {
-      pauseMusic();
-    }
-  } else if (type === "vibration") {
-    state.vibrationEnabled = !state.vibrationEnabled;
-    updateToggleUI("vibration-toggle", state.vibrationEnabled);
-    if (state.vibrationEnabled) {
-      vibrate([30, 20, 30]); // feedback imediato ao ligar
-    }
-  }
-  saveProgress();
-}
-
-// Inicia a música no primeiro toque/clique do usuário (necessário por política dos navegadores)
-function setupMusicUnlock() {
-  const unlock = () => {
-    if (state.musicEnabled && !state.musicStarted) {
-      tryPlayMusic();
-    }
-    document.removeEventListener("click", unlock);
-    document.removeEventListener("touchstart", unlock);
-  };
-  document.addEventListener("click", unlock, { once: true });
-  document.addEventListener("touchstart", unlock, { once: true });
-=======
-function getCase(id) {
-  return CASES.find((c) => c.id === id);
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 }
 
 // =====================================================================
@@ -520,10 +432,6 @@ function showView(id) {
   document.getElementById(id).classList.add("active");
   if (id === "cases-view") renderCasesList();
   if (id === "profile-view") updateProfile();
-  if (id === "settings-view") {
-    updateToggleUI("music-toggle", state.musicEnabled);
-    updateToggleUI("vibration-toggle", state.vibrationEnabled);
-  }
   window.scrollTo(0, 0);
 }
 
@@ -551,114 +459,6 @@ function showToast(text) {
   t.textContent = text;
   t.classList.add("show");
   setTimeout(() => t.classList.remove("show"), 2600);
-}
-
-// =====================================================================
-// ÁUDIO AMBIENTE (gerado via Web Audio API — sem depender de nenhum
-// arquivo .mp3 externo). Cria um drone sombrio com duas camadas de
-// osciladores + um "chiado" filtrado de fundo, tudo controlado por um
-// nó de ganho mestre que o toggle de Música liga/desliga.
-// =====================================================================
-let audioCtx = null;
-let musicNodes = null;
-
-function initAudioContext() {
-  if (audioCtx) return;
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return;
-  audioCtx = new Ctx();
-}
-
-function buildAmbientMusic() {
-  const master = audioCtx.createGain();
-  master.gain.value = 0; // começa em silêncio, sobe suavemente em startMusic()
-  master.connect(audioCtx.destination);
-
-  // Camada de drone grave (acordes abertos, clima de suspense/noir)
-  const freqs = [55, 82.5, 110]; // A1, E2, A2
-  const oscillators = [];
-  freqs.forEach((f, i) => {
-    const osc = audioCtx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.value = f;
-    const oscGain = audioCtx.createGain();
-    oscGain.gain.value = 0.07 - i * 0.018;
-    osc.connect(oscGain);
-    oscGain.connect(master);
-    osc.start();
-    oscillators.push(osc);
-  });
-
-  // LFO lento modulando o volume mestre (efeito de "respiração")
-  const lfo = audioCtx.createOscillator();
-  lfo.type = "sine";
-  lfo.frequency.value = 0.07;
-  const lfoGain = audioCtx.createGain();
-  lfoGain.gain.value = 0.04;
-  lfo.connect(lfoGain);
-  lfoGain.connect(master.gain);
-  lfo.start();
-
-  // Textura de ruído filtrado (vento/tensão de fundo)
-  const bufferSize = 2 * audioCtx.sampleRate;
-  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-  const output = noiseBuffer.getChannelData(0);
-  for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
-
-  const noise = audioCtx.createBufferSource();
-  noise.buffer = noiseBuffer;
-  noise.loop = true;
-
-  const noiseFilter = audioCtx.createBiquadFilter();
-  noiseFilter.type = "lowpass";
-  noiseFilter.frequency.value = 380;
-
-  const noiseGain = audioCtx.createGain();
-  noiseGain.gain.value = 0.02;
-
-  noise.connect(noiseFilter);
-  noiseFilter.connect(noiseGain);
-  noiseGain.connect(master);
-  noise.start();
-
-  return { master, oscillators, lfo, noise };
-}
-
-function startMusic() {
-  initAudioContext();
-  if (!audioCtx) return;
-  if (audioCtx.state === "suspended") audioCtx.resume();
-  if (!musicNodes) musicNodes = buildAmbientMusic();
-  setMusicVolume(state.musicOn);
-}
-
-function setMusicVolume(on) {
-  if (!musicNodes || !audioCtx) return;
-  const target = on ? 0.2 : 0;
-  musicNodes.master.gain.cancelScheduledValues(audioCtx.currentTime);
-  musicNodes.master.gain.linearRampToValueAtTime(target, audioCtx.currentTime + 0.7);
-}
-
-// Navegadores só permitem áudio após um gesto do usuário (clique/toque).
-// Este listener "arma" o início da música no primeiro toque na tela.
-function armMusicStart() {
-  const start = () => {
-    if (state.musicOn) startMusic();
-    document.removeEventListener("click", start);
-    document.removeEventListener("touchstart", start);
-  };
-  document.addEventListener("click", start, { once: true });
-  document.addEventListener("touchstart", start, { once: true });
-}
-
-// =====================================================================
-// VIBRAÇÃO — feedback tátil sempre que o jogador estiver ativo
-// (examinar/coletar evidência, confrontar suspeito, resolver o caso).
-// =====================================================================
-function vibrate(pattern) {
-  if (state.vibrationOn && "vibrate" in navigator) {
-    navigator.vibrate(pattern);
-  }
 }
 
 // =====================================================================
@@ -734,7 +534,6 @@ function openCase(caseId) {
   document.getElementById("intro-objective").textContent = c.objective;
 
   showView("intro-view");
-  vibrate([25]);
 }
 
 // =====================================================================
@@ -765,8 +564,6 @@ function startInvestigation() {
   updateProfile();
   showView("scene-view");
   showToast("Investigação iniciada. Procure os pontos dourados.");
-  vibrate([40, 30, 60]);
-  tryPlayMusic();
 }
 
 function renderFoundList() {
@@ -795,7 +592,6 @@ function openEvidence(key) {
   if (!item) return;
 
   state.currentEvidence = key;
-  vibrate(15); // pequeno toque ao examinar uma evidência
 
   document.getElementById("evidence-type").textContent = item.type;
   document.getElementById("evidence-name").textContent = item.name;
@@ -809,10 +605,6 @@ function openEvidence(key) {
   btn.classList.toggle("opacity-50", already);
 
   document.getElementById("evidence-modal").classList.add("open");
-<<<<<<< HEAD
-  vibrate([20]);
-=======
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 }
 
 function collectEvidence() {
@@ -822,10 +614,8 @@ function collectEvidence() {
   state.found.add(key);
   renderFoundList();
   gainXP(25);
-  vibrate([20, 40, 20]); // confirmação tátil de que a prova entrou no inventário
   closeModal();
   showToast("Prova coletada: +25 XP");
-  vibrate([50, 30, 80]);
   saveProgress();
 }
 
@@ -886,7 +676,6 @@ function openInterrogation(suspectId) {
   const suspect = c.suspects.find((s) => s.id === suspectId);
   state.currentSuspectId = suspectId;
   state.interrogated.add(suspectId);
-  vibrate(15);
 
   document.getElementById("interrogation-name").textContent = suspect.name;
   document.getElementById("chat-log").innerHTML =
@@ -914,7 +703,6 @@ function openInterrogation(suspectId) {
   });
 
   showPanel("interrogation-panel");
-  vibrate([25]);
   saveProgress();
 }
 
@@ -929,11 +717,9 @@ function askQuestion(type) {
   if (type === "where") {
     questionLabel = "Onde você estava na noite do crime?";
     reply = dialogue.where;
-    vibrate(15);
   } else if (type === "relation") {
     questionLabel = "Você conhecia a vítima?";
     reply = dialogue.relation;
-    vibrate(15);
   } else if (type === "confront") {
     const confrontEv = c.evidences.find((ev) => ev.key === dialogue.confrontEvidence);
     questionLabel = "Confrontar com: " + confrontEv.name;
@@ -942,18 +728,7 @@ function askQuestion(type) {
 
     if (hasEvidence) {
       gainXP(20);
-<<<<<<< HEAD
-=======
-      vibrate([15, 40, 15, 40, 15]); // padrão mais forte: contradição encontrada
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
       showToast("Contradição registrada: +20 XP");
-      vibrate([60, 40, 80]);
-    } else {
-<<<<<<< HEAD
-      vibrate([30]);
-=======
-      vibrate(15);
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
     }
   }
 
@@ -1022,6 +797,8 @@ function populateSolveForm() {
   document.getElementById("solve-feedback").classList.add("hidden");
 }
 
+// Repopula o formulário sempre que o jogador abre a tela de resolução,
+// já que cada caso tem suspeitos, armas e motivos diferentes.
 document.addEventListener("DOMContentLoaded", () => {
   const solveNavButtons = document.querySelectorAll('[onclick*="solve-view"]');
   solveNavButtons.forEach((btn) => {
@@ -1047,20 +824,11 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
   if (!correct) {
     feedback.textContent = "Algumas respostas não correspondem às evidências. Revise a investigação antes de acusar alguém.";
     feedback.classList.remove("hidden");
-<<<<<<< HEAD
-    vibrate([80, 50, 80, 50, 80]);
-=======
-    vibrate(80); // vibração única e longa = resposta incorreta
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
     return;
   }
 
   state.solvedCases[c.id] = true;
   gainXP(150);
-<<<<<<< HEAD
-=======
-  vibrate([30, 60, 30, 60, 30]); // padrão comemorativo = caso resolvido
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 
   document.getElementById("result-copy").textContent = c.resultText;
   document.getElementById("result-clues").textContent = state.found.size + "/" + c.evidences.length;
@@ -1070,7 +838,6 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
 
   saveProgress();
   showView("result-view");
-  vibrate([40, 30, 40, 30, 100]);
 });
 
 // =====================================================================
@@ -1097,53 +864,15 @@ function updateProfile() {
 }
 
 // =====================================================================
-// CONFIGURAÇÕES — toggles de Música e Vibração
+// CONFIGURAÇÕES
 // =====================================================================
-<<<<<<< HEAD
-=======
 function toggleSetting(id) {
   const el = document.getElementById(id);
-  const isOn = el.classList.toggle("toggle-on");
+  el.classList.toggle("toggle-on");
   el.querySelector("span").classList.toggle("translate-x-5");
-  el.setAttribute("aria-checked", String(isOn));
-
-  if (id === "music-toggle") {
-    state.musicOn = isOn;
-    startMusic(); // garante que o AudioContext já existe/está retomado
-    setMusicVolume(isOn);
-    showToast(isOn ? "Música ativada" : "Música desativada");
-  } else if (id === "vibration-toggle") {
-    state.vibrationOn = isOn;
-    showToast(isOn ? "Vibração ativada" : "Vibração desativada");
-    if (isOn) vibrate(20); // dá um toque de exemplo ao ligar
-  }
-
   saveProgress();
 }
 
-// Aplica o estado salvo (música/vibração) visualmente nos botões,
-// já que o HTML sempre nasce com os dois toggles ligados por padrão.
-function applySettingsUI() {
-  const musicEl = document.getElementById("music-toggle");
-  const vibrationEl = document.getElementById("vibration-toggle");
-
-  [
-    [musicEl, state.musicOn],
-    [vibrationEl, state.vibrationOn],
-  ].forEach(([el, isOn]) => {
-    if (!el) return;
-    el.classList.toggle("toggle-on", isOn);
-    el.setAttribute("aria-checked", String(isOn));
-    const knob = el.querySelector("span");
-    if (isOn) {
-      knob.classList.add("translate-x-5");
-    } else {
-      knob.classList.remove("translate-x-5");
-    }
-  });
-}
-
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 function resetProgress() {
   if (!confirm("Tem certeza que deseja apagar todo o seu progresso?")) return;
   localStorage.removeItem("crimeSolverProgress");
@@ -1151,18 +880,6 @@ function resetProgress() {
   state.solvedCases = {};
   state.found = new Set();
   state.interrogated = new Set();
-<<<<<<< HEAD
-  state.musicEnabled = true;
-  state.vibrationEnabled = true;
-  updateToggleUI("music-toggle", true);
-  updateToggleUI("vibration-toggle", true);
-  tryPlayMusic();
-=======
-  state.musicOn = true;
-  state.vibrationOn = true;
-  applySettingsUI();
-  setMusicVolume(true);
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
   updateProfile();
   showToast("Progresso reiniciado.");
   showView("menu-view");
@@ -1171,6 +888,10 @@ function resetProgress() {
 // =====================================================================
 // PERSISTÊNCIA (localStorage)
 // =====================================================================
+// Obs.: para um projeto de Banco de Dados "de verdade", esta função é o
+// ponto onde entraria uma chamada a uma API/backend conectada ao seu
+// banco de dados (ex.: fetch('/api/progresso', { method:'POST', ... })).
+// Por enquanto, o progresso é salvo localmente no navegador do jogador.
 function saveProgress() {
   const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
   const record = {
@@ -1183,15 +904,6 @@ function saveProgress() {
       found: [...state.found],
       interrogated: [...state.interrogated],
     },
-<<<<<<< HEAD
-    music_enabled: state.musicEnabled,
-    vibration_enabled: state.vibrationEnabled,
-=======
-    settings: {
-      music_on: state.musicOn,
-      vibration_on: state.vibrationOn,
-    },
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
   };
 
   try {
@@ -1209,20 +921,6 @@ function loadProgress() {
     const record = JSON.parse(raw);
     state.xp = Number(record.xp) || 0;
     state.solvedCases = record.solved_cases || {};
-<<<<<<< HEAD
-    if (typeof record.music_enabled === "boolean") {
-      state.musicEnabled = record.music_enabled;
-    }
-    if (typeof record.vibration_enabled === "boolean") {
-      state.vibrationEnabled = record.vibration_enabled;
-    }
-=======
-
-    if (record.settings) {
-      state.musicOn = record.settings.music_on !== false;
-      state.vibrationOn = record.settings.vibration_on !== false;
-    }
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
   } catch (e) {
     console.warn("Não foi possível carregar o progresso salvo.", e);
   }
@@ -1234,26 +932,8 @@ function loadProgress() {
 function init() {
   lucide.createIcons();
   loadProgress();
-  applySettingsUI();
   updateProfile();
-<<<<<<< HEAD
-  updateToggleUI("music-toggle", state.musicEnabled);
-  updateToggleUI("vibration-toggle", state.vibrationEnabled);
-  setupMusicUnlock();
-
-  // Volume baixo por padrão
-  const audio = getMusic();
-  if (audio) audio.volume = 0.32;
-
-  setTimeout(() => {
-    showView("menu-view");
-    // Tenta tocar após o splash (pode ser bloqueado, mas o unlock de clique resolve)
-    if (state.musicEnabled) tryPlayMusic();
-  }, 2000);
-=======
-  armMusicStart();
   setTimeout(() => showView("menu-view"), 2000);
->>>>>>> 471c9faa350591df22c506ca9ac418c6d9157c86
 }
 
 init();
