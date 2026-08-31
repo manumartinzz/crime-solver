@@ -19,7 +19,7 @@ const CASES = [
       "Eduardo Vilela, dono de uma grande construtora, foi encontrado morto em seu escritório. Não há sinais de arrombamento, o que sugere que a vítima conhecia seu assassino.",
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
-    victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Eduardo+Vilela",
+    victimImage: "9UrwG.jpg",
     sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Cena+do+Crime+001",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
     evidences: [
@@ -872,23 +872,6 @@ function toggleSetting(id) {
   el.querySelector("span").classList.toggle("translate-x-5");
   saveProgress();
 }
-
-<script>
-    const musica = document.getElementById("musicaAmbiente");
-    const botao = document.getElementById("botaoMusica");
-
-    musica.volume = 0.25;
-
-    botao.addEventListener("click", () => {
-        if (musica.paused) {
-            musica.play();
-            botao.textContent = "🔊 Música";
-        } else {
-            musica.pause();
-            botao.textContent = "🔇 Música";
-        }
-    });
-</script>
 
 function resetProgress() {
   if (!confirm("Tem certeza que deseja apagar todo o seu progresso?")) return;
