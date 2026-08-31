@@ -21,7 +21,6 @@
         <div class="splash-lens mx-auto mb-7 flex h-28 w-28 items-center justify-center rounded-full border-4 border-[#d3a750] bg-[#171d26] shadow-[0_0_55px_rgba(211,167,80,.28)]">
           <i data-lucide="search" class="h-14 w-14 text-[#e9e2d4]"></i>
         </div>
-        <p class="mono mb-3 text-xs tracking-[.32em]">ARQUIVO CONFIDENCIAL Nº 001</p>
         <h1 class="noir-title text-5xl font-bold">CRIME SOLVER</h1>
         <p class="mt-3 text-sm tracking-[.16em] text-[#9aa4af]">INVESTIGAÇÃO &amp; MISTÉRIO</p>
       </div>
@@ -64,28 +63,6 @@
             <button type="button" onclick="showView('settings-view')" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
               <span>Configurações</span><i data-lucide="settings-2" class="h-5 w-5 text-[#d3a750]"></i>
             </button>
-
-            <audio id="musicaAmbiente" loop>
-    <source src="https://open.spotify.com/intl-pt/track/4EzsVu5UAg32vdJhfBQKTq?si=7513f0b1c91246d3" type="audio/mpeg">
-</audio>
-
-<script>
-    const musica = document.getElementById("musicaAmbiente");
-    const botao = document.getElementById("botaoMusica");
-
-    musica.volume = 0.25;
-
-    botao.addEventListener("click", () => {
-        if (musica.paused) {
-            musica.play();
-            botao.textContent = "🔊 Música";
-        } else {
-            musica.pause();
-            botao.textContent = "🔇 Música";
-        }
-    });
-</script>
-
             <button type="button" onclick="showCredits()" class="menu-button flex w-full items-center justify-between rounded-lg px-5 py-4 text-left">
               <span>Créditos</span><i data-lucide="info" class="h-5 w-5 text-[#d3a750]"></i>
             </button>
