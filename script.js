@@ -418,6 +418,12 @@ function getCurrentCase() {
   return getCase(state.currentCaseId);
 }
 
+function refreshIcons() {
+  if (window.lucide && typeof window.lucide.createIcons === "function") {
+    window.lucide.createIcons();
+  }
+}
+
 function isUnlocked() {
   // Todos os casos ficam liberados desde o início, independente
   // de o jogador já ter resolvido os casos anteriores ou não.
@@ -440,14 +446,17 @@ function showView(id) {
 }
 
 function showPanel(id) {
-  document.getElementById(id).classList.add("open");
+  const panel = document.getElementById(id);
+  if (!panel) return;
+  panel.classList.add("open");
   if (id === "inventory-panel") renderInventory();
   if (id === "suspects-panel") renderSuspects();
   if (id === "files-panel") renderFiles();
 }
 
 function closePanel(id) {
-  document.getElementById(id).classList.remove("open");
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.remove("open");
 }
 
 function closeModal() {
@@ -517,15 +526,16 @@ function renderCasesList() {
     grid.appendChild(card);
   });
 
-  lucide.createIcons();
+  refreshIcons();
 }
 
 function openCase(caseId) {
+  const c = getCase(caseId);
+  if (!c) return;
+
   state.currentCaseId = caseId;
   state.found = new Set();
   state.interrogated = new Set();
-
-  const c = getCase(caseId);
 
   document.getElementById("intro-code").textContent = c.code + " — INTRODUÇÃO";
   document.getElementById("victim-image").src = c.victimImage;
@@ -545,6 +555,11 @@ function openCase(caseId) {
 // =====================================================================
 function startInvestigation() {
   const c = getCurrentCase();
+  if (!c) {
+    showToast("Escolha um caso antes de iniciar a investigação.");
+    showView("cases-view");
+    return;
+  }
 
   document.getElementById("scene-code").textContent = c.code;
   document.getElementById("scene-title").textContent = "Cena do Crime";
@@ -806,6 +821,11 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
   event.preventDefault();
 
   const c = getCurrentCase();
+  if (!c) {
+    showView("cases-view");
+    return;
+  }
+
   const killer = document.getElementById("killer").value;
   const weapon = document.getElementById("weapon").value;
   const motive = document.getElementById("motive").value;
@@ -926,10 +946,19 @@ function loadProgress() {
 // INICIALIZAÇÃO
 // =====================================================================
 function init() {
-  lucide.createIcons();
-  loadProgress();
-  updateProfile();
-  setTimeout(() => showView("menu-view"), 2000);
+  try {
+    refreshIcons();
+    loadProgress();
+    updateProfile();
+    setTimeout(() => showView("menu-view"), 2000);
+  } catch (error) {
+    console.error("Falha ao iniciar o jogo:", error);
+    showView("menu-view");
+  }
 }
 
-init();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init, { once: true });
+} else {
+  init();
+}
