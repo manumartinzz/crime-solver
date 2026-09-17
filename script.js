@@ -428,10 +428,14 @@ function isUnlocked() {
 // NAVEGAÇÃO ENTRE TELAS
 // =====================================================================
 function showView(id) {
+  const nextView = document.getElementById(id);
+  if (!nextView) return;
+
   document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  nextView.classList.add("active");
   if (id === "cases-view") renderCasesList();
   if (id === "profile-view") updateProfile();
+  if (id === "solve-view") populateSolveForm();
   window.scrollTo(0, 0);
 }
 
@@ -765,6 +769,7 @@ function renderFiles() {
 // =====================================================================
 function populateSolveForm() {
   const c = getCurrentCase();
+  if (!c) return;
 
   const killerSelect = document.getElementById("killer");
   const weaponSelect = document.getElementById("weapon");
@@ -796,15 +801,6 @@ function populateSolveForm() {
 
   document.getElementById("solve-feedback").classList.add("hidden");
 }
-
-// Repopula o formulário sempre que o jogador abre a tela de resolução,
-// já que cada caso tem suspeitos, armas e motivos diferentes.
-document.addEventListener("DOMContentLoaded", () => {
-  const solveNavButtons = document.querySelectorAll('[onclick*="solve-view"]');
-  solveNavButtons.forEach((btn) => {
-    btn.addEventListener("click", populateSolveForm);
-  });
-});
 
 document.getElementById("solve-form").addEventListener("submit", (event) => {
   event.preventDefault();
