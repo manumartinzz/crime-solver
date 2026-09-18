@@ -11,6 +11,12 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  /* Evita o "double-tap to zoom" e deixa os toques mais responsivos em mobile */
+  touch-action: manipulation;
 }
 
 body {
@@ -18,6 +24,8 @@ body {
   font-family: "DM Sans", sans-serif;
   color: var(--paper);
   background: var(--ink);
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
 }
 
 button, input, textarea, select {
@@ -36,9 +44,27 @@ select:focus-visible {
   outline-offset: 3px;
 }
 
+/* Garante um alvo de toque confortável (mínimo recomendado ~44px) em
+   qualquer botão marcado como tap-target, essencial em telas de celular. */
+.tap-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+nav .tap-target,
+.menu-button.tap-target {
+  justify-content: space-between;
+}
+
 .app-shell {
   width: 100%;
+  /* 100dvh acompanha a altura real da viewport em navegadores mobile,
+     evitando que a barra de endereço "corte" o conteúdo. */
   min-height: 100vh;
+  min-height: 100dvh;
   background: radial-gradient(circle at 75% 0%, #20202a 0%, #090b10 42%, #050608 100%);
   overflow: hidden;
 }
@@ -47,15 +73,31 @@ select:focus-visible {
   display: none;
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .view.active {
   display: flex;
 }
 
+/* Respeita o "notch"/barra de status de aparelhos com tela cheia (iPhones
+   com Dynamic Island, Android com câmera no topo, etc.) */
+.safe-top {
+  padding-top: max(env(safe-area-inset-top), 1rem);
+}
+.safe-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom), .5rem);
+}
+
 .noir-title {
   font-family: "Playfair Display", serif;
   letter-spacing: .04em;
+}
+
+/* Título fluido: cresce em telas grandes e encolhe automaticamente em
+   telas pequenas, sem precisar de vários breakpoints manuais. */
+.fluid-title {
+  font-size: clamp(2.25rem, 5vw + 1rem, 3.75rem);
 }
 
 .mono {
@@ -113,8 +155,12 @@ select:focus-visible {
 
 .evidence-dot {
   position: absolute;
-  width: 35px;
-  height: 35px;
+  /* Maior que o original (35px) para facilitar o toque em telas pequenas,
+     seguindo a recomendação de alvos de toque de ~44px. */
+  width: 44px;
+  height: 44px;
+  margin-left: -22px;
+  margin-top: -22px;
   border-radius: 50%;
   border: 2px solid #f3d37a;
   box-shadow: 0 0 0 7px rgba(211, 167, 80, .18), 0 0 20px rgba(211, 167, 80, .8);
@@ -149,6 +195,15 @@ select:focus-visible {
 
 .modal.open {
   display: flex;
+}
+
+/* Em telas pequenas os cartões de modal ficam com altura máxima e rolagem
+   própria, para nunca ultrapassar a viewport nem esconder o botão de
+   fechar atrás do teclado virtual. */
+.modal-card {
+  max-height: 88vh;
+  max-height: 88dvh;
+  overflow-y: auto;
 }
 
 .toast {
@@ -188,11 +243,28 @@ select:focus-visible {
   background: #d3a750 !important;
 }
 
+/* ---- Dossiê / História do Caso ---- */
+.dossier-tab {
+  background: linear-gradient(135deg, #e8c98a, var(--gold));
+}
+
+.dossier-text p {
+  text-indent: 0;
+}
+
+.dossier-text p + p {
+  margin-top: 1rem;
+}
+
 @media (max-width: 768px) {
   .scene-layout {
     grid-template-columns: 1fr !important;
   }
   .case-intro {
     grid-template-columns: 1fr !important;
+  }
+  .modal-card {
+    max-height: 92vh;
+    max-height: 92dvh;
   }
 }
