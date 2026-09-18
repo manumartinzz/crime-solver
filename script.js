@@ -3,6 +3,12 @@
 // Cada caso funciona como um "registro" com todas as informações
 // necessárias para gerar a introdução, a cena, os suspeitos, o
 // interrogatório, os arquivos e a tela de solução daquele caso.
+//
+// Dica sobre imagens: coloque os arquivos de imagem dentro da pasta
+// "images/" do projeto (ex.: images/9UrwG.jpg) e referencie o caminho
+// relativo aqui embaixo, como já está feito no caso001. Se um arquivo
+// não for encontrado, o jogo mostra automaticamente uma imagem de
+// placeholder no lugar (veja a função setImageWithFallback).
 // =====================================================================
 const CASES = [
   {
@@ -19,9 +25,12 @@ const CASES = [
       "Eduardo Vilela, dono de uma grande construtora, foi encontrado morto em seu escritório. Não há sinais de arrombamento, o que sugere que a vítima conhecia seu assassino.",
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
-    victimImage: "9UrwG.jpg",
-    sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Cena+do+Crime+001",
+    // A mesma foto aparece tanto na introdução quanto como fundo da cena do crime.
+    victimImage: "images/9UrwG.jpg",
+    sceneImage: "images/9UrwG.jpg",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
+    caseHistory:
+      "Eduardo Vilela construiu a Vilela Empreendimentos do zero, transformando uma pequena empreiteira herdada do pai em uma das maiores construtoras da região. Aos 54 anos, era conhecido por sua obsessão com contratos bem fechados e por nunca perdoar quem tentasse levar vantagem sobre ele — uma fama que rendeu tanto respeito quanto inimizades silenciosas.\n\nNos últimos meses, a empresa vinha sendo investigada por irregularidades em uma licitação pública, e Eduardo havia começado a reunir documentos que, segundo rumores no escritório, comprometeriam diretamente pessoas de seu círculo mais próximo. Ele se tornou reservado, trancava a porta do escritório mesmo durante o expediente e passou a guardar cópias de tudo em lugares inusitados da própria casa.\n\nNa noite de 14 de março, a mansão recebia poucos visitantes. A vítima havia dispensado a equipe de segurança externa mais cedo, alegando que trataria de \"um assunto pessoal\". Por volta da meia-noite, um funcionário encontrou o corpo no escritório, com a porta destrancada por dentro — sinal de que Eduardo havia recebido alguém que conhecia e em quem, até aquele momento, ainda confiava.\n\nA polícia isolou a mansão ainda de madrugada. Não havia sinais de luta generalizada, o cofre não fora tocado, e os documentos mais recentes sobre a licitação haviam desaparecido da mesa. Tudo indica que o motivo do crime está entrelaçado com os negócios da família — e que o assassino sabia exatamente o que procurava.",
     evidences: [
       { key: "knife", name: "Faca de cozinha", type: "EVIDÊNCIA 01", x: 30, y: 58,
         description: "A lâmina contém manchas escuras. Uma análise posterior pode ligar a arma diretamente ao crime." },
@@ -87,6 +96,8 @@ const CASES = [
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Roberto+Aguiar",
     sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Camarim+do+Teatro",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
+    caseHistory:
+      "Roberto Aguiar era o nome mais cobiçado do teatro local havia mais de uma década. Carismático nos palcos e implacável nos bastidores, construiu a carreira sobre uma régua rígida: quem não estivesse à altura do seu talento simplesmente não merecia estar ao seu lado no elenco. \"A Última Cortina\" seria seu papel de despedida antes de uma temporada internacional, e a expectativa em torno da estreia havia atraído críticos de todo o país.\n\nNos bastidores, porém, a tensão crescia havia semanas. Roberto vinha entrando em atrito com praticamente toda a produção: cortou falas de colegas sem avisar o diretor, exigiu a troca de cenários dias antes da estreia e não escondia que considerava seu contrato de seguro \"um seguro para os outros, não para mim\", numa piada amarga sobre quanto sua imagem valia para os investidores.\n\nNa noite do crime, o teatro estava lotado de convidados, jornalistas e patrocinadores circulando pelo saguão enquanto o elenco se preparava nos camarins. Roberto pediu para ficar sozinho nos vinte minutos antes de subir ao palco, como fazia em toda estreia — um ritual que todos respeitavam. Foi exatamente nesse intervalo, com a porta trancada por dentro, que ele foi encontrado sem vida por uma assistente de palco, minutos antes de as cortinas se abrirem.\n\nA produção tentou abafar o caso para não cancelar a temporada, mas a perícia logo constatou que não se tratava de um mal súbito: havia sinais de uma substância estranha em sua taça de vinho, guardada havia anos como amuleto de boa sorte antes de cada estreia.",
     evidences: [
       { key: "wineglass", name: "Taça de vinho", type: "EVIDÊNCIA 01", x: 28, y: 60,
         description: "Restos de um pó branco dissolvido no fundo da taça. O laudo aponta uma substância tóxica de ação rápida." },
@@ -152,6 +163,8 @@ const CASES = [
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Antonieta+Serpa",
     sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Galeria+de+Arte",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
+    caseHistory:
+      "Antonieta Serpa passou quarenta anos construindo uma das galerias de arte mais respeitadas do país, herdada de sua família e transformada, sob seu comando, em referência para colecionadores de todo o continente. Viúva e sem filhos, tratava a galeria — e as obras dentro dela — como seu único legado verdadeiro.\n\nO leilão daquela noite era, segundo ela mesma dizia aos convidados, \"o coroamento de uma carreira\": a venda de uma pintura rara recém-autenticada, avaliada em uma cifra que atraiu compradores internacionais e, inevitavelmente, muita cobiça. Nos bastidores, no entanto, a autenticidade da obra vinha sendo questionada em círculos mais restritos, e Antonieta sabia disso — vinha revisando pessoalmente cada documento de procedência nas semanas anteriores.\n\nA galeria funcionava havia anos com uma estrutura elétrica antiga, e apagões ocasionais durante eventos não eram incomuns, o que tornava fácil disfarçar uma falha proposital como um simples acidente. Na noite do leilão, a luz caiu bem no instante em que o lance final estava prestes a ser anunciado — e quando voltou, segundos depois, o cavalete estava vazio e Antonieta caída ao lado dele.\n\nA galeria foi isolada antes mesmo de os convidados deixarem o prédio. Nenhuma testemunha viu o momento exato do ataque, mas todos concordam em um ponto: quem fez aquilo conhecia bem o funcionamento interno da casa — e sabia exatamente onde cortar a energia.",
     evidences: [
       { key: "glove", name: "Luva de couro rasgada", type: "EVIDÊNCIA 01", x: 26, y: 62,
         description: "Uma luva de couro preta, rasgada na altura dos dedos, encontrada perto do gerador de energia da galeria." },
@@ -217,6 +230,8 @@ const CASES = [
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Prof.+Henrique",
     sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Escritorio+da+Universidade",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
+    caseHistory:
+      "O professor Henrique Dantas dedicou trinta anos de carreira à pesquisa em seu departamento, sendo reconhecido tanto pelo rigor científico quanto pela reputação de nunca fechar os olhos para irregularidades — uma postura que, ao longo dos anos, fez dele uma figura tão admirada quanto temida entre os colegas.\n\nMeses antes de sua morte, Henrique começou a notar inconsistências em dados de pesquisas publicadas pelo departamento, financiadas por verbas públicas significativas. Discretamente, passou a reunir provas: planilhas, e-mails e rascunhos de um artigo que, segundo ele confidenciou a um colega próximo, \"colocaria luz sobre coisas que muita gente prefere manter no escuro\". A denúncia formal estava marcada para ser protocolada na semana seguinte à sua morte.\n\nNaquele dia, Henrique havia ministrado uma palestra concorrida sobre ética em pesquisa científica — um tema que, em retrospecto, muitos consideraram uma indireta direta a pessoas presentes na plateia. Ele voltou ao escritório logo depois, dizendo a uma aluna que precisava \"organizar uns documentos antes de mandar tudo para a reitoria\".\n\nHoras depois, foi encontrado sem vida, com a porta trancada por dentro e uma xícara de café pela metade sobre a mesa. O pen drive com os dados originais da pesquisa, que ele guardava sempre consigo, não foi encontrado no bolso do paletó — apenas uma cópia escondida atrás de uma fileira de livros escapou do que quer que tenha acontecido naquela sala.",
     evidences: [
       { key: "draft", name: "Rascunho de artigo", type: "EVIDÊNCIA 01", x: 24, y: 58,
         description: "Um rascunho de artigo científico, com trechos rasurados e o nome de uma colega de departamento circulado em vermelho." },
@@ -282,6 +297,8 @@ const CASES = [
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Otavio+Redman",
     sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Praia+da+Ilha",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
+    caseHistory:
+      "Otávio Redman era o tipo de empresário que fazia questão de decidir tudo pessoalmente. Fundador de um grupo de investimentos com sócios espalhados pelo país, escolheu sua ilha particular para reunir a diretoria em um retiro de fim de ano — oficialmente para \"alinhar a visão da empresa para o próximo ciclo\", mas, segundo comentários reservados da equipe, na verdade para anunciar mudanças que reorganizariam o poder dentro do grupo.\n\nDias antes da viagem, Otávio havia descoberto uma movimentação financeira que não batia com os relatórios oficiais — uma diferença pequena o suficiente para passar despercebida por auditores externos, mas grande demais para ele ignorar. Reservado por natureza, decidiu não expor o assunto publicamente antes de confirmar todos os detalhes, e usou o retiro como pretexto para observar de perto o comportamento de quem estava por trás da movimentação.\n\nA ilha só tinha um barco de acesso, que retornava ao continente apenas pela manhã, o que tornava o grupo completamente isolado durante a noite. Depois do jantar, Otávio avisou que sairia para \"tomar um ar\" na praia antes de dormir — um hábito conhecido por todos os hóspedes frequentes da casa. Ele nunca voltou.\n\nO corpo foi encontrado de madrugada por um funcionário da equipe de limpeza, na areia próxima às pedras, longe o suficiente da casa principal para que ninguém tivesse ouvido ou visto absolutamente nada. Com o barco só retornando ao amanhecer, uma certeza incomodava a todos: o responsável ainda estava na ilha, dividindo o mesmo teto que as outras vítimas em potencial.",
     evidences: [
       { key: "rope", name: "Corda de amarração cortada", type: "EVIDÊNCIA 01", x: 27, y: 60,
         description: "Um pedaço de corda náutica cortada de forma irregular, encontrado enrolado próximo às pedras da praia." },
@@ -347,6 +364,8 @@ const CASES = [
     victimImage: "https://placehold.co/600x800/171d26/9aa4af?text=Vitor+Hollanda",
     sceneImage: "https://placehold.co/1200x800/11151c/313a47?text=Estudio+de+Radio",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
+    caseHistory:
+      "Vitor Hollanda construiu sua carreira sobre uma promessa simples: dizer no ar o que ninguém tinha coragem de dizer em voz alta. Seu programa noturno na Rádio Frequência Livre já havia derrubado dois secretários municipais e exposto contratos superfaturados, o que lhe rendeu tanto um público fiel quanto uma lista silenciosa de inimigos poderosos.\n\nNas semanas anteriores à sua morte, Vitor vinha investigando denúncias de corrupção envolvendo a Câmara Municipal, e fontes internas da produção afirmam que ele já tinha documentos suficientes para \"acabar com uma carreira política inteira\" — palavras que ele mesmo teria usado em uma ligação gravada por engano pela equipe técnica. O nome do responsável, no entanto, ele guardava só para si, alimentando o suspense até a noite da grande revelação.\n\nNaquela noite de 27 de janeiro, o roteiro do programa já estava fechado havia dias, com um nome circulado repetidamente ao lado da palavra \"hoje\". A produção sabia que seria uma edição histórica. Durante o intervalo comercial, com o microfone ainda ligado por hábito, Vitor foi encontrado sem vida na cabine de transmissão, poucos minutos antes de voltar ao ar para a parte mais aguardada do programa.\n\nA emissora tentou justificar a interrupção como \"problemas técnicos\" para não alarmar os ouvintes, mas a perícia logo desconfiou de sabotagem: os fios do equipamento de áudio apresentavam sinais de manipulação recente, e um e-mail de ameaça, impresso e sem remetente identificado, foi encontrado dobrado dentro da gaveta da mesa de Vitor.",
     evidences: [
       { key: "script", name: "Roteiro do programa", type: "EVIDÊNCIA 01", x: 25, y: 59,
         description: "O roteiro da noite tem um nome circulado várias vezes em vermelho, ao lado da palavra “hoje”." },
@@ -396,6 +415,25 @@ const CASES = [
   },
 ];
 
+// Placeholder usado sempre que uma imagem do jogo não pode ser carregada
+// (arquivo ausente, caminho errado, sem internet etc.), para que a tela
+// nunca fique com um "ícone quebrado" no lugar da foto.
+const FALLBACK_IMAGE = "https://placehold.co/900x1200/171d26/9aa4af?text=Imagem+indispon%C3%ADvel";
+
+// Aplica uma imagem a um elemento <img> com um fallback automático caso
+// o arquivo não seja encontrado (ex.: você ainda não adicionou o arquivo
+// em /images no seu repositório do GitHub).
+function setImageWithFallback(imgEl, src, altText) {
+  if (!imgEl) return;
+  imgEl.onerror = null;
+  imgEl.alt = altText || imgEl.alt;
+  imgEl.onerror = function () {
+    imgEl.onerror = null;
+    imgEl.src = FALLBACK_IMAGE;
+  };
+  imgEl.src = src;
+}
+
 // =====================================================================
 // ESTADO DO JOGO
 // =====================================================================
@@ -408,6 +446,8 @@ const state = {
   currentSuspectId: null,
   interrogated: new Set(),
   startedAt: Date.now(),
+  settings: { music: true, vibration: true },
+  caseProgress: {}, // { caso001: { found: [...], interrogated: [...] } }
 };
 
 function getCase(id) {
@@ -428,6 +468,15 @@ function isUnlocked() {
   // Todos os casos ficam liberados desde o início, independente
   // de o jogador já ter resolvido os casos anteriores ou não.
   return true;
+}
+
+// Vibração curta (feedback tátil), respeitando a configuração do jogador
+// e o suporte do navegador/aparelho.
+function hapticFeedback(pattern) {
+  if (!state.settings.vibration) return;
+  if (window.navigator && typeof window.navigator.vibrate === "function") {
+    window.navigator.vibrate(pattern || 15);
+  }
 }
 
 // =====================================================================
@@ -474,6 +523,26 @@ function showToast(text) {
   setTimeout(() => t.classList.remove("show"), 2600);
 }
 
+// Fecha qualquer modal aberto clicando fora do cartão (no fundo escuro)
+// ou pressionando a tecla Esc — comportamento esperado tanto em desktop
+// quanto em navegadores mobile.
+function setupModalDismiss() {
+  document.querySelectorAll(".modal").forEach((modal) => {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        modal.classList.remove("open");
+      }
+    });
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    document.querySelectorAll(".modal.open").forEach((modal) => {
+      modal.classList.remove("open");
+    });
+  });
+}
+
 // =====================================================================
 // 3. LISTA DE CASOS
 // =====================================================================
@@ -515,7 +584,7 @@ function renderCasesList() {
         </div>
         <div class="mt-6 flex items-center justify-between border-t border-[#343d49] pt-5">
           <span class="mono text-xs text-[#aeb6c0]">${solved ? "RESOLVIDO" : "EM INVESTIGAÇÃO"}</span>
-          <button type="button" class="rounded bg-[#d3a750] px-4 py-2 text-sm font-bold text-[#11151c]">
+          <button type="button" class="tap-target rounded bg-[#d3a750] px-4 py-2 text-sm font-bold text-[#11151c]">
             ${solved ? "Revisitar" : "Investigar"}
           </button>
         </div>
@@ -534,12 +603,16 @@ function openCase(caseId) {
   if (!c) return;
 
   state.currentCaseId = caseId;
-  state.found = new Set();
-  state.interrogated = new Set();
+
+  // Restaura o progresso salvo daquele caso específico (provas já
+  // encontradas e suspeitos já interrogados), se o jogador já tiver
+  // começado essa investigação antes.
+  const saved = state.caseProgress[caseId];
+  state.found = new Set(saved ? saved.found : []);
+  state.interrogated = new Set(saved ? saved.interrogated : []);
 
   document.getElementById("intro-code").textContent = c.code + " — INTRODUÇÃO";
-  document.getElementById("victim-image").src = c.victimImage;
-  document.getElementById("victim-image").alt = "Foto de " + c.victimName;
+  setImageWithFallback(document.getElementById("victim-image"), c.victimImage, "Foto de " + c.victimName);
   document.getElementById("intro-title").textContent = c.title;
   document.getElementById("intro-story").textContent = c.story;
   document.getElementById("intro-location").textContent = c.location;
@@ -548,6 +621,32 @@ function openCase(caseId) {
   document.getElementById("intro-objective").textContent = c.objective;
 
   showView("intro-view");
+}
+
+// =====================================================================
+// 4B. HISTÓRIA DO CASO (dossiê policial)
+// =====================================================================
+function openCaseHistory() {
+  const c = getCurrentCase();
+  if (!c) return;
+
+  document.getElementById("history-code").textContent = c.code + " — DOSSIÊ";
+  document.getElementById("history-title").textContent = c.title;
+  document.getElementById("history-victim").textContent = "Vítima: " + c.victimName;
+  document.getElementById("history-location").textContent = c.location;
+  document.getElementById("history-date").textContent = c.date;
+
+  const textContainer = document.getElementById("history-text");
+  textContainer.innerHTML = "";
+  const paragraphs = (c.caseHistory || c.story || "").split(/\n\s*\n/);
+  paragraphs.forEach((paragraph) => {
+    const p = document.createElement("p");
+    p.textContent = paragraph.trim();
+    textContainer.appendChild(p);
+  });
+
+  showPanel("history-modal");
+  refreshIcons();
 }
 
 // =====================================================================
@@ -563,7 +662,7 @@ function startInvestigation() {
 
   document.getElementById("scene-code").textContent = c.code;
   document.getElementById("scene-title").textContent = "Cena do Crime";
-  document.getElementById("scene-image").src = c.sceneImage;
+  setImageWithFallback(document.getElementById("scene-image"), c.sceneImage, "Cena do crime — " + c.title);
   document.getElementById("scene-hint").textContent = c.sceneHint;
 
   const hotspots = document.getElementById("evidence-hotspots");
@@ -615,7 +714,7 @@ function openEvidence(key) {
   document.getElementById("evidence-type").textContent = item.type;
   document.getElementById("evidence-name").textContent = item.name;
   document.getElementById("evidence-description").textContent = item.description;
-  document.getElementById("evidence-image").src = c.sceneImage;
+  setImageWithFallback(document.getElementById("evidence-image"), c.sceneImage, item.name);
 
   const btn = document.getElementById("collect-button");
   const already = state.found.has(key);
@@ -633,6 +732,7 @@ function collectEvidence() {
   state.found.add(key);
   renderFoundList();
   gainXP(25);
+  hapticFeedback(20);
   closeModal();
   showToast("Prova coletada: +25 XP");
   saveProgress();
@@ -656,7 +756,7 @@ function renderInventory() {
           <p class="font-semibold">${ev.name}</p>
           <p class="mt-1 text-xs text-[#9aa4af]">${ev.description}</p>
         </div>
-        <button class="rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Analisar</button>
+        <button class="tap-target rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Analisar</button>
       `;
       row.querySelector("button").addEventListener("click", () => openEvidence(ev.key));
       list.appendChild(row);
@@ -680,7 +780,7 @@ function renderSuspects() {
       <div class="p-4">
         <h3 class="font-bold">${s.name}</h3>
         <p class="mt-1 text-xs text-[#9aa4af]">${s.age} anos · ${s.profession} · ${s.relation}</p>
-        <button class="mt-4 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Interrogar</button>
+        <button class="tap-target mt-4 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Interrogar</button>
       </div>
     `;
     article.querySelector("button").addEventListener("click", () => openInterrogation(s.id));
@@ -715,7 +815,7 @@ function openInterrogation(suspectId) {
   qList.forEach((q) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "answer rounded p-3 text-left text-sm";
+    btn.className = "answer tap-target rounded p-3 text-left text-sm";
     btn.textContent = q.label;
     btn.addEventListener("click", () => askQuestion(q.type));
     questions.appendChild(btn);
@@ -747,6 +847,7 @@ function askQuestion(type) {
 
     if (hasEvidence) {
       gainXP(20);
+      hapticFeedback([15, 40, 15]);
       showToast("Contradição registrada: +20 XP");
     }
   }
@@ -886,6 +987,10 @@ function toggleSetting(id) {
   const el = document.getElementById(id);
   el.classList.toggle("toggle-on");
   el.querySelector("span").classList.toggle("translate-x-5");
+
+  if (id === "music-toggle") state.settings.music = el.classList.contains("toggle-on");
+  if (id === "vibration-toggle") state.settings.vibration = el.classList.contains("toggle-on");
+
   saveProgress();
 }
 
@@ -896,6 +1001,7 @@ function resetProgress() {
   state.solvedCases = {};
   state.found = new Set();
   state.interrogated = new Set();
+  state.caseProgress = {};
   updateProfile();
   showToast("Progresso reiniciado.");
   showView("menu-view");
@@ -910,16 +1016,24 @@ function resetProgress() {
 // Por enquanto, o progresso é salvo localmente no navegador do jogador.
 function saveProgress() {
   const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
+
+  // Atualiza o progresso do caso atual dentro do mapa geral de progresso,
+  // para que provas e interrogatórios não se percam ao trocar de tela.
+  if (state.currentCaseId) {
+    state.caseProgress[state.currentCaseId] = {
+      found: [...state.found],
+      interrogated: [...state.interrogated],
+    };
+  }
+
   const record = {
     player_name: "Detetive",
     xp: state.xp,
     solved_cases: state.solvedCases,
     total_play_time: elapsed,
     current_case_id: state.currentCaseId,
-    case_progress: {
-      found: [...state.found],
-      interrogated: [...state.interrogated],
-    },
+    case_progress_all: state.caseProgress,
+    settings: state.settings,
   };
 
   try {
@@ -937,9 +1051,31 @@ function loadProgress() {
     const record = JSON.parse(raw);
     state.xp = Number(record.xp) || 0;
     state.solvedCases = record.solved_cases || {};
+    state.caseProgress = record.case_progress_all || {};
+
+    if (record.settings) {
+      state.settings.music = record.settings.music !== false;
+      state.settings.vibration = record.settings.vibration !== false;
+    }
   } catch (e) {
     console.warn("Não foi possível carregar o progresso salvo.", e);
   }
+}
+
+// Aplica os toggles de configuração salvos assim que a interface existir.
+function applySettingsToUI() {
+  const musicEl = document.getElementById("music-toggle");
+  const vibrationEl = document.getElementById("vibration-toggle");
+
+  [
+    { el: musicEl, on: state.settings.music },
+    { el: vibrationEl, on: state.settings.vibration },
+  ].forEach(({ el, on }) => {
+    if (!el) return;
+    el.classList.toggle("toggle-on", on);
+    const span = el.querySelector("span");
+    if (span) span.classList.toggle("translate-x-5", on);
+  });
 }
 
 // =====================================================================
@@ -949,7 +1085,9 @@ function init() {
   try {
     refreshIcons();
     loadProgress();
+    applySettingsToUI();
     updateProfile();
+    setupModalDismiss();
     setTimeout(() => showView("menu-view"), 2000);
   } catch (error) {
     console.error("Falha ao iniciar o jogo:", error);
