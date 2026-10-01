@@ -19,6 +19,14 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#d3a750">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Crime Solver">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
 </head>
 <body>
   <div class="app-shell grain">
@@ -418,5 +426,20 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+  if ("serviceWorker" in navigator ) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("./service-worker.js")
+        .then(() => {
+          console.log("Crime Solver PWA ativado.");
+        })
+        .catch((error) => {
+          console.error("Erro ao registrar o PWA:", error);
+        });
+    });
+  }
+</script>
+
 </body>
 </html>
