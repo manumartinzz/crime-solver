@@ -1,4 +1,6 @@
-const CACHE_NAME = "crime-solver-v1";
+// IMPORTANTE: sempre que alterar qualquer arquivo do jogo, aumente o número
+// da versão (v2 -> v3 -> v4...) para forçar o navegador a baixar tudo de novo.
+const CACHE_NAME = "crime-solver-v2";
 
 const FILES_TO_CACHE = [
   "./",
