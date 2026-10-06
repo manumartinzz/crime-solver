@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0c0f14">
+  <meta name="theme-color" content="#d3a750">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Crime Solver">
   <meta name="description" content="Crime Solver — jogo de investigação e mistério.">
   <title>Crime Solver</title>
 
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon-192.png">
 
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
@@ -19,14 +20,6 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#d3a750">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Crime Solver">
-<link rel="apple-touch-icon" href="./icon-192.png">
-
 </head>
 <body>
   <div class="app-shell grain">
@@ -106,7 +99,23 @@
         <p id="intro-code" class="mono text-xs tracking-[.2em] text-[#d3a750]">INTRODUÇÃO DO CASO</p>
       </header>
       <main class="case-intro mx-auto grid w-full max-w-5xl gap-8 px-5 py-8 md:grid-cols-[.8fr_1.2fr] md:px-10">
-        <img id="victim-image" loading="lazy" class="h-80 w-full rounded-lg object-cover grayscale" alt="Foto da vítima">
+
+        <!-- CARROSSEL DE FOTOS DA VÍTIMA (horizontal) -->
+        <div>
+          <div class="carousel-wrap">
+            <div id="carousel-viewport" class="carousel-viewport h-80 w-full overflow-hidden rounded-lg md:h-[28rem]">
+              <div id="carousel-track" class="carousel-track h-full"></div>
+            </div>
+            <button id="carousel-prev" type="button" aria-label="Foto anterior" class="carousel-arrow tap-target left-2">
+              <i data-lucide="chevron-left" class="h-5 w-5"></i>
+            </button>
+            <button id="carousel-next" type="button" aria-label="Próxima foto" class="carousel-arrow tap-target right-2">
+              <i data-lucide="chevron-right" class="h-5 w-5"></i>
+            </button>
+          </div>
+          <div id="carousel-dots" class="mt-3 flex justify-center gap-2"></div>
+        </div>
+
         <div>
           <h1 id="intro-title" class="noir-title text-4xl font-bold"></h1>
           <p id="intro-story" class="mt-5 leading-7 text-[#b5bdc6]"></p>
@@ -427,19 +436,19 @@
 
   <script src="script.js"></script>
   <script>
-  if ("serviceWorker" in navigator ) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker
-        .register("./service-worker.js")
-        .then(() => {
-          console.log("Crime Solver PWA ativado.");
-        })
-        .catch((error) => {
-          console.error("Erro ao registrar o PWA:", error);
-        });
-    });
-  }
-</script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .then(() => {
+            console.log("Crime Solver PWA ativado.");
+          })
+          .catch((error) => {
+            console.error("Erro ao registrar o PWA:", error);
+          });
+      });
+    }
+  </script>
 
 </body>
 </html>
