@@ -5,10 +5,14 @@
 // interrogatório, os arquivos e a tela de solução daquele caso.
 //
 // Dica sobre imagens: coloque os arquivos de imagem dentro da pasta
-// "images/" do projeto (ex.: images/9UrwG.jpg) e referencie o caminho
-// relativo aqui embaixo, como já está feito no caso001. Se um arquivo
-// não for encontrado, o jogo mostra automaticamente uma imagem de
-// placeholder no lugar (veja a função setImageWithFallback).
+// "images/" do projeto e referencie o caminho relativo aqui embaixo,
+// como já está feito no caso001. Se um arquivo não for encontrado, o
+// jogo mostra automaticamente uma imagem de placeholder no lugar
+// (veja a função setImageWithFallback).
+//
+// Fotos da vítima na introdução:
+//  - victimImages: lista de fotos -> aparece como carrossel horizontal.
+//  - victimImage: uma foto só -> aparece sem setas nem bolinhas.
 // =====================================================================
 const CASES = [
   {
@@ -25,9 +29,14 @@ const CASES = [
       "Eduardo Vilela, dono de uma grande construtora, foi encontrado morto em seu escritório. Não há sinais de arrombamento, o que sugere que a vítima conhecia seu assassino.",
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
-    // A mesma foto aparece tanto na introdução quanto como fundo da cena do crime.
-    victimImage: "images/9UrwG.jpg",
-    sceneImage: "images/9UrwG.jpg",
+    // Carrossel da introdução (arraste para o lado ou use as setas).
+    // Se as imagens estiverem na raiz do repositório, remova "images/".
+    victimImages: [
+      { src: "images/perfil-001.jpg", alt: "Eduardo Vilela — retrato" },
+      { src: "images/corpo-todo-001.jpg", alt: "Eduardo Vilela — corpo inteiro" },
+    ],
+    // Foto da cena do crime (também usada no modal de evidência).
+    sceneImage: "images/cena-001.jpg",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
     caseHistory:
       "Eduardo Vilela construiu a Vilela Empreendimentos do zero, transformando uma pequena empreiteira herdada do pai em uma das maiores construtoras da região. Aos 54 anos, era conhecido por sua obsessão com contratos bem fechados e por nunca perdoar quem tentasse levar vantagem sobre ele — uma fama que rendeu tanto respeito quanto inimizades silenciosas.\n\nNos últimos meses, a empresa vinha sendo investigada por irregularidades em uma licitação pública, e Eduardo havia começado a reunir documentos que, segundo rumores no escritório, comprometeriam diretamente pessoas de seu círculo mais próximo. Ele se tornou reservado, trancava a porta do escritório mesmo durante o expediente e passou a guardar cópias de tudo em lugares inusitados da própria casa.\n\nNa noite de 14 de março, a mansão recebia poucos visitantes. A vítima havia dispensado a equipe de segurança externa mais cedo, alegando que trataria de \"um assunto pessoal\". Por volta da meia-noite, um funcionário encontrou o corpo no escritório, com a porta destrancada por dentro — sinal de que Eduardo havia recebido alguém que conhecia e em quem, até aquele momento, ainda confiava.\n\nA polícia isolou a mansão ainda de madrugada. Não havia sinais de luta generalizada, o cofre não fora tocado, e os documentos mais recentes sobre a licitação haviam desaparecido da mesa. Tudo indica que o motivo do crime está entrelaçado com os negócios da família — e que o assassino sabia exatamente o que procurava.",
@@ -435,6 +444,91 @@ function setImageWithFallback(imgEl, src, altText) {
 }
 
 // =====================================================================
+// CARROSSEL DA INTRODUÇÃO (horizontal)
+// =====================================================================
+const carousel = { index: 0, total: 0 };
+
+function buildVictimCarousel(c) {
+  const track = document.getElementById("carousel-track");
+  const dots = document.getElementById("carousel-dots");
+  const prev = document.getElementById("carousel-prev");
+  const next = document.getElementById("carousel-next");
+
+  // Aceita uma lista de imagens (victimImages) ou uma única (victimImage)
+  const images = c.victimImages && c.victimImages.length
+    ? c.victimImages
+    : [{ src: c.victimImage, alt: "Foto de " + c.victimName }];
+
+  track.innerHTML = "";
+  dots.innerHTML = "";
+  carousel.index = 0;
+  carousel.total = images.length;
+
+  images.forEach((img, i) => {
+    const slide = document.createElement("div");
+    slide.className = "carousel-slide";
+
+    const el = document.createElement("img");
+    el.className = "h-full w-full object-cover";
+    el.draggable = false;
+    setImageWithFallback(el, img.src, img.alt);
+    slide.appendChild(el);
+    track.appendChild(slide);
+
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "carousel-dot";
+    dot.setAttribute("aria-label", "Ir para a foto " + (i + 1));
+    dot.addEventListener("click", () => goToSlide(i));
+    dots.appendChild(dot);
+  });
+
+  // Com apenas 1 imagem, esconde setas e bolinhas
+  const multiple = images.length > 1;
+  prev.classList.toggle("is-hidden", !multiple);
+  next.classList.toggle("is-hidden", !multiple);
+  dots.classList.toggle("is-hidden", !multiple);
+
+  updateCarousel();
+}
+
+function goToSlide(i) {
+  carousel.index = Math.max(0, Math.min(carousel.total - 1, i));
+  updateCarousel();
+}
+
+function updateCarousel() {
+  const track = document.getElementById("carousel-track");
+  track.style.transform = "translateX(-" + carousel.index * 100 + "%)";
+
+  document.querySelectorAll(".carousel-dot").forEach((d, i) => {
+    d.classList.toggle("active", i === carousel.index);
+  });
+  document.getElementById("carousel-prev").disabled = carousel.index === 0;
+  document.getElementById("carousel-next").disabled = carousel.index === carousel.total - 1;
+}
+
+// Setas + deslizar com o dedo (mobile) ou arrastar com o mouse
+function setupCarousel() {
+  document.getElementById("carousel-prev").addEventListener("click", () => goToSlide(carousel.index - 1));
+  document.getElementById("carousel-next").addEventListener("click", () => goToSlide(carousel.index + 1));
+
+  const viewport = document.getElementById("carousel-viewport");
+  let startX = null;
+
+  viewport.addEventListener("pointerdown", (e) => { startX = e.clientX; });
+  viewport.addEventListener("pointerup", (e) => {
+    if (startX === null) return;
+    const diff = e.clientX - startX;
+    startX = null;
+    if (Math.abs(diff) < 40) return;
+    goToSlide(carousel.index + (diff < 0 ? 1 : -1));
+    hapticFeedback(10);
+  });
+  viewport.addEventListener("pointercancel", () => { startX = null; });
+}
+
+// =====================================================================
 // ESTADO DO JOGO
 // =====================================================================
 const state = {
@@ -612,7 +706,7 @@ function openCase(caseId) {
   state.interrogated = new Set(saved ? saved.interrogated : []);
 
   document.getElementById("intro-code").textContent = c.code + " — INTRODUÇÃO";
-  setImageWithFallback(document.getElementById("victim-image"), c.victimImage, "Foto de " + c.victimName);
+  buildVictimCarousel(c);
   document.getElementById("intro-title").textContent = c.title;
   document.getElementById("intro-story").textContent = c.story;
   document.getElementById("intro-location").textContent = c.location;
@@ -621,6 +715,7 @@ function openCase(caseId) {
   document.getElementById("intro-objective").textContent = c.objective;
 
   showView("intro-view");
+  refreshIcons();
 }
 
 // =====================================================================
@@ -1088,6 +1183,7 @@ function init() {
     applySettingsToUI();
     updateProfile();
     setupModalDismiss();
+    setupCarousel();
     setTimeout(() => showView("menu-view"), 2000);
   } catch (error) {
     console.error("Falha ao iniciar o jogo:", error);
