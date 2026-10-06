@@ -4,15 +4,18 @@
 // necessárias para gerar a introdução, a cena, os suspeitos, o
 // interrogatório, os arquivos e a tela de solução daquele caso.
 //
-// Dica sobre imagens: coloque os arquivos de imagem dentro da pasta
-// "images/" do projeto e referencie o caminho relativo aqui embaixo,
-// como já está feito no caso001. Se um arquivo não for encontrado, o
-// jogo mostra automaticamente uma imagem de placeholder no lugar
-// (veja a função setImageWithFallback).
+// IMAGENS: os arquivos do caso 001 estão na RAIZ do repositório
+// (ao lado do index.html), por isso os caminhos abaixo NÃO usam "images/".
+// O jogo também tenta automaticamente a outra variante (com/sem "images/"),
+// então funciona nas duas organizações. Atenção: no GitHub o nome do arquivo
+// precisa bater EXATAMENTE (maiúsculas/minúsculas e extensão).
+// Se nenhuma variante for encontrada, aparece uma imagem de aviso.
 //
 // Fotos da vítima na introdução:
 //  - victimImages: lista de fotos -> aparece como carrossel horizontal.
 //  - victimImage: uma foto só -> aparece sem setas nem bolinhas.
+//
+// Foto opcional de cada suspeito: adicione o campo "photo" no suspeito.
 // =====================================================================
 const CASES = [
   {
@@ -29,14 +32,11 @@ const CASES = [
       "Eduardo Vilela, dono de uma grande construtora, foi encontrado morto em seu escritório. Não há sinais de arrombamento, o que sugere que a vítima conhecia seu assassino.",
     objective:
       "Reúna as provas na cena do crime, interrogue os suspeitos e descubra quem matou Eduardo Vilela, com qual arma e por qual motivo.",
-    // Carrossel da introdução (arraste para o lado ou use as setas).
-    // Se as imagens estiverem na raiz do repositório, remova "images/".
     victimImages: [
-      { src: "images/perfil-001.jpg", alt: "Eduardo Vilela — retrato" },
-      { src: "images/corpo-todo-001.jpg", alt: "Eduardo Vilela — corpo inteiro" },
+      { src: "perfil-001.jpg", alt: "Eduardo Vilela — retrato" },
+      { src: "corpo-todo-001.jpg", alt: "Eduardo Vilela — corpo inteiro" },
     ],
-    // Foto da cena do crime (também usada no modal de evidência).
-    sceneImage: "images/cena-001.jpg",
+    sceneImage: "cena-001.jpg",
     sceneHint: "Toque nos pontos dourados para examinar evidências.",
     caseHistory:
       "Eduardo Vilela construiu a Vilela Empreendimentos do zero, transformando uma pequena empreiteira herdada do pai em uma das maiores construtoras da região. Aos 54 anos, era conhecido por sua obsessão com contratos bem fechados e por nunca perdoar quem tentasse levar vantagem sobre ele — uma fama que rendeu tanto respeito quanto inimizades silenciosas.\n\nNos últimos meses, a empresa vinha sendo investigada por irregularidades em uma licitação pública, e Eduardo havia começado a reunir documentos que, segundo rumores no escritório, comprometeriam diretamente pessoas de seu círculo mais próximo. Ele se tornou reservado, trancava a porta do escritório mesmo durante o expediente e passou a guardar cópias de tudo em lugares inusitados da própria casa.\n\nNa noite de 14 de março, a mansão recebia poucos visitantes. A vítima havia dispensado a equipe de segurança externa mais cedo, alegando que trataria de \"um assunto pessoal\". Por volta da meia-noite, um funcionário encontrou o corpo no escritório, com a porta destrancada por dentro — sinal de que Eduardo havia recebido alguém que conhecia e em quem, até aquele momento, ainda confiava.\n\nA polícia isolou a mansão ainda de madrugada. Não havia sinais de luta generalizada, o cofre não fora tocado, e os documentos mais recentes sobre a licitação haviam desaparecido da mesa. Tudo indica que o motivo do crime está entrelaçado com os negócios da família — e que o assassino sabia exatamente o que procurava.",
@@ -214,12 +214,13 @@ const CASES = [
       { id: "inheritance", label: "Disputa de herança" },
       { id: "fraud", label: "Encobrir fraude de autenticidade" },
     ],
-    solution: { killer: "bento", weapon: "statue", motive: "theft" },
+    // CORREÇÃO: a arma agora é a moldura (a única prova física com sangue na cena).
+    solution: { killer: "bento", weapon: "frame", motive: "theft" },
     files: [
       { title: "Inventário da Galeria", description: "Lista todas as obras em exposição na noite do leilão; o quadro em disputa consta como “removido para restauração”, sem registro oficial." },
       { title: "Relatório da Queda de Energia", description: "A concessionária confirma que não houve nenhuma falha externa: o apagão foi causado manualmente no quadro de força interno da galeria." },
     ],
-    resultText: "Bento Farias aproveitou o apagão que ele mesmo provocou para golpear Antonieta Serpa e roubar o quadro, pretendendo vendê-lo para quitar suas dívidas de jogo.",
+    resultText: "Bento Farias aproveitou o apagão que ele mesmo provocou para golpear Antonieta Serpa com a moldura do quadro e roubar a obra, pretendendo vendê-la para quitar suas dívidas de jogo.",
   },
 
   {
@@ -424,23 +425,57 @@ const CASES = [
   },
 ];
 
-// Placeholder usado sempre que uma imagem do jogo não pode ser carregada
-// (arquivo ausente, caminho errado, sem internet etc.), para que a tela
-// nunca fique com um "ícone quebrado" no lugar da foto.
-const FALLBACK_IMAGE = "https://placehold.co/900x1200/171d26/9aa4af?text=Imagem+indispon%C3%ADvel";
+// =====================================================================
+// UTILITÁRIOS
+// =====================================================================
 
-// Aplica uma imagem a um elemento <img> com um fallback automático caso
-// o arquivo não seja encontrado (ex.: você ainda não adicionou o arquivo
-// em /images no seu repositório do GitHub).
+// Escapa texto antes de inserir em innerHTML.
+function esc(value) {
+  return String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[ch]));
+}
+
+// Imagem de aviso embutida (SVG em data URI): funciona mesmo sem internet
+// e nunca vira "ícone quebrado".
+const FALLBACK_IMAGE =
+  "data:image/svg+xml;charset=utf-8," +
+  encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">' +
+    '<rect width="100%" height="100%" fill="#171d26"/>' +
+    '<text x="50%" y="50%" fill="#9aa4af" font-family="sans-serif" font-size="42" text-anchor="middle">Imagem indisponível</text>' +
+    "</svg>"
+  );
+
+// Gera as variantes de caminho a tentar: o caminho original e a versão
+// com/sem a pasta "images/". Isso resolve o problema de o arquivo estar na
+// raiz do repositório ou dentro de /images.
+function imageCandidates(src) {
+  if (!src) return [];
+  if (/^(https?:|data:|blob:|\/)/i.test(src)) return [src];
+  const list = [src];
+  if (src.indexOf("images/") === 0) list.push(src.slice(7));
+  else if (src.indexOf("/") === -1) list.push("images/" + src);
+  return list;
+}
+
+// Aplica uma imagem a um <img>, tentando as variantes e caindo para o
+// placeholder embutido se nenhuma carregar.
 function setImageWithFallback(imgEl, src, altText) {
   if (!imgEl) return;
-  imgEl.onerror = null;
-  imgEl.alt = altText || imgEl.alt;
-  imgEl.onerror = function () {
-    imgEl.onerror = null;
-    imgEl.src = FALLBACK_IMAGE;
+  if (altText) imgEl.alt = altText;
+
+  const queue = imageCandidates(src);
+  const tryNext = () => {
+    if (queue.length === 0) {
+      imgEl.onerror = null;
+      imgEl.src = FALLBACK_IMAGE;
+      return;
+    }
+    imgEl.src = queue.shift();
   };
-  imgEl.src = src;
+  imgEl.onerror = tryNext;
+  tryNext();
 }
 
 // =====================================================================
@@ -526,6 +561,7 @@ function setupCarousel() {
     hapticFeedback(10);
   });
   viewport.addEventListener("pointercancel", () => { startX = null; });
+  viewport.addEventListener("pointerleave", () => { startX = null; });
 }
 
 // =====================================================================
@@ -533,16 +569,24 @@ function setupCarousel() {
 // =====================================================================
 const state = {
   xp: 0,
-  solvedCases: {}, // { caso001: true, caso002: true, ... }
+  solvedCases: {},          // { caso001: true, ... }
   currentCaseId: null,
   found: new Set(),
+  contradictions: new Set(), // suspeitos já confrontados com sucesso (evita farm de XP)
   currentEvidence: null,
   currentSuspectId: null,
   interrogated: new Set(),
-  startedAt: Date.now(),
+  startedAt: Date.now(),     // início da sessão atual
+  playTimeBase: 0,           // segundos jogados em sessões anteriores
+  caseSeconds: {},           // { caso001: segundos }
+  caseTick: null,            // marca de tempo do caso em andamento
+  fastSolved: false,         // conquista "menos de 20 minutos"
   settings: { music: true, vibration: true },
-  caseProgress: {}, // { caso001: { found: [...], interrogated: [...] } }
+  caseProgress: {},          // { caso001: { found, interrogated, contradictions } }
 };
+
+const FAST_SOLVE_SECONDS = 20 * 60;
+const CASE_VIEWS = ["intro-view", "scene-view", "solve-view"];
 
 function getCase(id) {
   return CASES.find((c) => c.id === id);
@@ -559,8 +603,7 @@ function refreshIcons() {
 }
 
 function isUnlocked() {
-  // Todos os casos ficam liberados desde o início, independente
-  // de o jogador já ter resolvido os casos anteriores ou não.
+  // Todos os casos ficam liberados desde o início.
   return true;
 }
 
@@ -573,6 +616,15 @@ function hapticFeedback(pattern) {
   }
 }
 
+// Soma ao caso atual o tempo decorrido desde a última marcação.
+function flushCaseTime() {
+  if (!state.currentCaseId || !state.caseTick) return;
+  const now = Date.now();
+  const delta = Math.round((now - state.caseTick) / 1000);
+  state.caseSeconds[state.currentCaseId] = (state.caseSeconds[state.currentCaseId] || 0) + delta;
+  state.caseTick = now;
+}
+
 // =====================================================================
 // NAVEGAÇÃO ENTRE TELAS
 // =====================================================================
@@ -580,11 +632,16 @@ function showView(id) {
   const nextView = document.getElementById(id);
   if (!nextView) return;
 
+  // Contagem de tempo só enquanto o jogador está dentro de um caso
+  flushCaseTime();
+  state.caseTick = state.currentCaseId && CASE_VIEWS.indexOf(id) !== -1 ? Date.now() : null;
+
   document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
   nextView.classList.add("active");
   if (id === "cases-view") renderCasesList();
   if (id === "profile-view") updateProfile();
   if (id === "solve-view") populateSolveForm();
+  if (id === "achievements-view") updateAchievements();
   window.scrollTo(0, 0);
 }
 
@@ -610,16 +667,17 @@ function showCredits() {
   showPanel("credits-modal");
 }
 
+let toastTimer = null;
 function showToast(text) {
   const t = document.getElementById("toast");
   t.textContent = text;
   t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2600);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
 }
 
 // Fecha qualquer modal aberto clicando fora do cartão (no fundo escuro)
-// ou pressionando a tecla Esc — comportamento esperado tanto em desktop
-// quanto em navegadores mobile.
+// ou pressionando a tecla Esc.
 function setupModalDismiss() {
   document.querySelectorAll(".modal").forEach((modal) => {
     modal.addEventListener("click", (event) => {
@@ -656,29 +714,35 @@ function renderCasesList() {
     const solved = !!state.solvedCases[c.id];
     const stars = "★".repeat(c.stars) + "☆".repeat(5 - c.stars);
     const diffClass = DIFFICULTY_STYLE[c.difficulty] || "bg-[#542825] text-[#e79b96]";
+    const prog = state.caseProgress[c.id];
+    const foundCount = prog && prog.found ? prog.found.length : 0;
 
     const card = document.createElement("article");
 
     if (!unlocked) {
       card.className = "rounded-xl border border-[#262d36] bg-[#0d1015] p-6 opacity-60";
       card.innerHTML = `
-        <i data-lucide="lock-keyhole" class="h-7 w-7 text-[#717b87]"></i>
-        <p class="mono mt-5 text-xs text-[#9aa4af]">${c.code}</p>
-        <h2 class="noir-title mt-3 text-2xl font-bold text-[#aeb6c0]">${c.title}</h2>
+        <i data-lucide="lock" class="h-7 w-7 text-[#717b87]"></i>
+        <p class="mono mt-5 text-xs text-[#9aa4af]">${esc(c.code)}</p>
+        <h2 class="noir-title mt-3 text-2xl font-bold text-[#aeb6c0]">${esc(c.title)}</h2>
         <p class="mt-5 text-sm text-[#7f8995]">Resolva o caso anterior para desbloquear esta investigação.</p>
       `;
     } else {
+      let status = "NÃO INICIADO";
+      if (solved) status = "RESOLVIDO";
+      else if (foundCount > 0) status = "EM INVESTIGAÇÃO · " + foundCount + "/" + c.evidences.length + " PROVAS";
+
       card.className = "case-card relative overflow-hidden rounded-xl p-6";
       card.innerHTML = `
-        <p class="mono text-xs tracking-[.18em] text-[#d3a750]">${c.code}</p>
-        <h2 class="noir-title mt-3 text-3xl font-bold">${c.title}</h2>
+        <p class="mono text-xs tracking-[.18em] text-[#d3a750]">${esc(c.code)}</p>
+        <h2 class="noir-title mt-3 text-3xl font-bold">${esc(c.title)}</h2>
         <div class="mt-5 flex items-center justify-between">
-          <span class="rounded px-3 py-1 text-xs ${diffClass}">${c.difficulty}</span>
+          <span class="rounded px-3 py-1 text-xs ${diffClass}">${esc(c.difficulty)}</span>
           <span class="text-[#d3a750]">${stars}</span>
         </div>
-        <div class="mt-6 flex items-center justify-between border-t border-[#343d49] pt-5">
-          <span class="mono text-xs text-[#aeb6c0]">${solved ? "RESOLVIDO" : "EM INVESTIGAÇÃO"}</span>
-          <button type="button" class="tap-target rounded bg-[#d3a750] px-4 py-2 text-sm font-bold text-[#11151c]">
+        <div class="mt-6 flex items-center justify-between gap-3 border-t border-[#343d49] pt-5">
+          <span class="mono text-xs text-[#aeb6c0]">${status}</span>
+          <button type="button" class="tap-target shrink-0 rounded bg-[#d3a750] px-4 py-2 text-sm font-bold text-[#11151c]">
             ${solved ? "Revisitar" : "Investigar"}
           </button>
         </div>
@@ -696,14 +760,16 @@ function openCase(caseId) {
   const c = getCase(caseId);
   if (!c) return;
 
+  // Fecha a contagem de tempo do caso anterior (se houver)
+  flushCaseTime();
+  state.caseTick = null;
   state.currentCaseId = caseId;
 
-  // Restaura o progresso salvo daquele caso específico (provas já
-  // encontradas e suspeitos já interrogados), se o jogador já tiver
-  // começado essa investigação antes.
+  // Restaura o progresso salvo daquele caso específico
   const saved = state.caseProgress[caseId];
-  state.found = new Set(saved ? saved.found : []);
-  state.interrogated = new Set(saved ? saved.interrogated : []);
+  state.found = new Set(saved && saved.found ? saved.found : []);
+  state.interrogated = new Set(saved && saved.interrogated ? saved.interrogated : []);
+  state.contradictions = new Set(saved && saved.contradictions ? saved.contradictions : []);
 
   document.getElementById("intro-code").textContent = c.code + " — INTRODUÇÃO";
   buildVictimCarousel(c);
@@ -845,13 +911,13 @@ function renderInventory() {
     .filter((ev) => state.found.has(ev.key))
     .forEach((ev) => {
       const row = document.createElement("article");
-      row.className = "flex items-center justify-between rounded border border-[#333d48] bg-[#10141a] p-3";
+      row.className = "flex items-center justify-between gap-3 rounded border border-[#333d48] bg-[#10141a] p-3";
       row.innerHTML = `
         <div>
-          <p class="font-semibold">${ev.name}</p>
-          <p class="mt-1 text-xs text-[#9aa4af]">${ev.description}</p>
+          <p class="font-semibold">${esc(ev.name)}</p>
+          <p class="mt-1 text-xs text-[#9aa4af]">${esc(ev.description)}</p>
         </div>
-        <button class="tap-target rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Analisar</button>
+        <button type="button" class="tap-target shrink-0 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Analisar</button>
       `;
       row.querySelector("button").addEventListener("click", () => openEvidence(ev.key));
       list.appendChild(row);
@@ -870,14 +936,18 @@ function renderSuspects() {
     const article = document.createElement("article");
     article.className = "overflow-hidden rounded-lg border border-[#333d48]";
     article.innerHTML = `
-      <img loading="lazy" class="h-36 w-full object-cover grayscale"
-           src="https://placehold.co/300x200/171d26/9aa4af?text=${encodeURIComponent(s.image)}" alt="${s.name}">
+      <img class="h-36 w-full object-cover grayscale" alt="${esc(s.name)}">
       <div class="p-4">
-        <h3 class="font-bold">${s.name}</h3>
-        <p class="mt-1 text-xs text-[#9aa4af]">${s.age} anos · ${s.profession} · ${s.relation}</p>
-        <button class="tap-target mt-4 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Interrogar</button>
+        <h3 class="font-bold">${esc(s.name)}</h3>
+        <p class="mt-1 text-xs text-[#9aa4af]">${esc(s.age)} anos · ${esc(s.profession)} · ${esc(s.relation)}</p>
+        <button type="button" class="tap-target mt-4 rounded border border-[#d3a750] px-3 py-2 text-xs text-[#e9e2d4]">Interrogar</button>
       </div>
     `;
+
+    // Foto própria do suspeito (campo "photo") ou placeholder com o nome
+    const photo = s.photo || ("https://placehold.co/300x200/171d26/9aa4af?text=" + encodeURIComponent(s.image));
+    setImageWithFallback(article.querySelector("img"), photo, s.name);
+
     article.querySelector("button").addEventListener("click", () => openInterrogation(s.id));
     grid.appendChild(article);
   });
@@ -888,12 +958,14 @@ function openInterrogation(suspectId) {
 
   const c = getCurrentCase();
   const suspect = c.suspects.find((s) => s.id === suspectId);
+  if (!suspect) return;
+
   state.currentSuspectId = suspectId;
   state.interrogated.add(suspectId);
 
   document.getElementById("interrogation-name").textContent = suspect.name;
   document.getElementById("chat-log").innerHTML =
-    '<p class="text-sm text-[#9aa4af]">Escolha uma pergunta para iniciar o interrogatório.</p>';
+    '<p class="chat-placeholder text-sm text-[#9aa4af]">Escolha uma pergunta para iniciar o interrogatório.</p>';
 
   const dialogue = c.dialogues[suspectId];
   const confrontEv = c.evidences.find((ev) => ev.key === dialogue.confrontEvidence);
@@ -920,10 +992,30 @@ function openInterrogation(suspectId) {
   saveProgress();
 }
 
+// Acrescenta uma pergunta e a resposta ao histórico do interrogatório.
+function appendChat(questionLabel, suspectName, reply) {
+  const chat = document.getElementById("chat-log");
+  const placeholder = chat.querySelector(".chat-placeholder");
+  if (placeholder) placeholder.remove();
+
+  const q = document.createElement("div");
+  q.className = "text-right text-sm text-[#d3a750]";
+  q.textContent = "Detetive: " + questionLabel;
+
+  const a = document.createElement("div");
+  a.className = "chat-bubble rounded-r p-3 text-sm text-[#d5dbe1]";
+  a.textContent = suspectName + ": " + reply;
+
+  chat.appendChild(q);
+  chat.appendChild(a);
+  a.scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
 function askQuestion(type) {
   const c = getCurrentCase();
-  const suspect = c.suspects.find((s) => s.id === state.currentSuspectId);
-  const dialogue = c.dialogues[state.currentSuspectId];
+  const suspectId = state.currentSuspectId;
+  const suspect = c.suspects.find((s) => s.id === suspectId);
+  const dialogue = c.dialogues[suspectId];
 
   let questionLabel = "";
   let reply = "";
@@ -940,19 +1032,16 @@ function askQuestion(type) {
     const hasEvidence = state.found.has(dialogue.confrontEvidence);
     reply = hasEvidence ? dialogue.confrontYes : dialogue.confrontNo;
 
-    if (hasEvidence) {
+    // XP só na primeira vez que a contradição é registrada (evita farm de XP)
+    if (hasEvidence && !state.contradictions.has(suspectId)) {
+      state.contradictions.add(suspectId);
       gainXP(20);
       hapticFeedback([15, 40, 15]);
       showToast("Contradição registrada: +20 XP");
     }
   }
 
-  const chat = document.getElementById("chat-log");
-  chat.innerHTML = `
-    <div class="text-right text-sm text-[#d3a750]">Detetive: ${questionLabel}</div>
-    <div class="chat-bubble rounded-r p-3 text-sm text-[#d5dbe1]">${suspect.name}: ${reply}</div>
-  `;
-
+  appendChat(questionLabel, suspect.name, reply);
   saveProgress();
 }
 
@@ -968,8 +1057,8 @@ function renderFiles() {
     const article = document.createElement("article");
     article.className = "rounded border border-[#333d48] bg-[#10141a] p-4";
     article.innerHTML = `
-      <p class="font-semibold">${f.title}</p>
-      <p class="mt-1 text-sm text-[#9aa4af]">${f.description}</p>
+      <p class="font-semibold">${esc(f.title)}</p>
+      <p class="mt-1 text-sm text-[#9aa4af]">${esc(f.description)}</p>
     `;
     list.appendChild(article);
   });
@@ -1025,13 +1114,18 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
   const killer = document.getElementById("killer").value;
   const weapon = document.getElementById("weapon").value;
   const motive = document.getElementById("motive").value;
+  const feedback = document.getElementById("solve-feedback");
+
+  if (!killer || !weapon || !motive) {
+    feedback.textContent = "Preencha o culpado, a arma e o motivo antes de acusar alguém.";
+    feedback.classList.remove("hidden");
+    return;
+  }
 
   const correct =
     killer === c.solution.killer &&
     weapon === c.solution.weapon &&
     motive === c.solution.motive;
-
-  const feedback = document.getElementById("solve-feedback");
 
   if (!correct) {
     feedback.textContent = "Algumas respostas não correspondem às evidências. Revise a investigação antes de acusar alguém.";
@@ -1039,21 +1133,37 @@ document.getElementById("solve-form").addEventListener("submit", (event) => {
     return;
   }
 
+  // XP de resolução só na primeira vez que o caso é resolvido
+  const firstTime = !state.solvedCases[c.id];
   state.solvedCases[c.id] = true;
-  gainXP(150);
+  const earned = firstTime ? 150 : 0;
+  if (earned) gainXP(earned);
+
+  // Conquista "menos de 20 minutos sem perder nenhuma pista"
+  flushCaseTime();
+  const seconds = state.caseSeconds[c.id] || 0;
+  if (state.found.size === c.evidences.length && seconds <= FAST_SOLVE_SECONDS) {
+    state.fastSolved = true;
+  }
+
+  const total = c.evidences.length;
+  const ratio = total ? state.found.size / total : 0;
+  const starCount = Math.max(1, Math.round(ratio * 5));
 
   document.getElementById("result-copy").textContent = c.resultText;
-  document.getElementById("result-clues").textContent = state.found.size + "/" + c.evidences.length;
-  document.getElementById("result-xp").textContent = "+150";
-  document.getElementById("result-accuracy").textContent =
-    Math.round((state.found.size / c.evidences.length) * 100) + "%";
+  document.getElementById("result-clues").textContent = state.found.size + "/" + total;
+  document.getElementById("result-xp").textContent = "+" + earned;
+  document.getElementById("result-accuracy").textContent = Math.round(ratio * 100) + "%";
+  document.getElementById("result-stars").textContent =
+    "★".repeat(starCount) + "☆".repeat(5 - starCount);
 
+  updateProfile();
   saveProgress();
   showView("result-view");
 });
 
 // =====================================================================
-// XP / NÍVEL / PERFIL
+// XP / NÍVEL / PERFIL / CONQUISTAS
 // =====================================================================
 function gainXP(amount) {
   state.xp += amount;
@@ -1073,6 +1183,24 @@ function updateProfile() {
   document.getElementById("profile-xp").textContent = state.xp;
   document.getElementById("profile-cases").textContent = solvedCount;
   document.getElementById("profile-medals").textContent = solvedCount * 2;
+
+  updateAchievements();
+}
+
+function updateAchievements() {
+  const solvedCount = Object.keys(state.solvedCases).length;
+  const unlocked = {
+    "first-case": solvedCount >= 1,
+    "fast-solver": state.fastSolved,
+    "master": solvedCount >= CASES.length,
+  };
+
+  document.querySelectorAll("[data-achievement]").forEach((el) => {
+    const on = !!unlocked[el.dataset.achievement];
+    el.classList.toggle("unlocked", on);
+    const status = el.querySelector(".achv-status");
+    if (status) status.textContent = on ? "DESBLOQUEADA" : "BLOQUEADA";
+  });
 }
 
 // =====================================================================
@@ -1082,6 +1210,7 @@ function toggleSetting(id) {
   const el = document.getElementById(id);
   el.classList.toggle("toggle-on");
   el.querySelector("span").classList.toggle("translate-x-5");
+  el.setAttribute("aria-checked", String(el.classList.contains("toggle-on")));
 
   if (id === "music-toggle") state.settings.music = el.classList.contains("toggle-on");
   if (id === "vibration-toggle") state.settings.vibration = el.classList.contains("toggle-on");
@@ -1091,12 +1220,23 @@ function toggleSetting(id) {
 
 function resetProgress() {
   if (!confirm("Tem certeza que deseja apagar todo o seu progresso?")) return;
-  localStorage.removeItem("crimeSolverProgress");
+  try {
+    localStorage.removeItem("crimeSolverProgress");
+  } catch (e) {
+    console.warn("Não foi possível limpar o progresso salvo.", e);
+  }
   state.xp = 0;
   state.solvedCases = {};
+  state.currentCaseId = null;
   state.found = new Set();
+  state.contradictions = new Set();
   state.interrogated = new Set();
   state.caseProgress = {};
+  state.caseSeconds = {};
+  state.caseTick = null;
+  state.fastSolved = false;
+  state.playTimeBase = 0;
+  state.startedAt = Date.now();
   updateProfile();
   showToast("Progresso reiniciado.");
   showView("menu-view");
@@ -1110,14 +1250,14 @@ function resetProgress() {
 // banco de dados (ex.: fetch('/api/progresso', { method:'POST', ... })).
 // Por enquanto, o progresso é salvo localmente no navegador do jogador.
 function saveProgress() {
-  const elapsed = Math.round((Date.now() - state.startedAt) / 1000);
+  flushCaseTime();
+  const elapsed = state.playTimeBase + Math.round((Date.now() - state.startedAt) / 1000);
 
-  // Atualiza o progresso do caso atual dentro do mapa geral de progresso,
-  // para que provas e interrogatórios não se percam ao trocar de tela.
   if (state.currentCaseId) {
     state.caseProgress[state.currentCaseId] = {
       found: [...state.found],
       interrogated: [...state.interrogated],
+      contradictions: [...state.contradictions],
     };
   }
 
@@ -1128,6 +1268,8 @@ function saveProgress() {
     total_play_time: elapsed,
     current_case_id: state.currentCaseId,
     case_progress_all: state.caseProgress,
+    case_seconds: state.caseSeconds,
+    fast_solved: state.fastSolved,
     settings: state.settings,
   };
 
@@ -1147,6 +1289,10 @@ function loadProgress() {
     state.xp = Number(record.xp) || 0;
     state.solvedCases = record.solved_cases || {};
     state.caseProgress = record.case_progress_all || {};
+    state.caseSeconds = record.case_seconds || {};
+    state.fastSolved = !!record.fast_solved;
+    state.playTimeBase = Number(record.total_play_time) || 0;
+    state.startedAt = Date.now();
 
     if (record.settings) {
       state.settings.music = record.settings.music !== false;
@@ -1159,15 +1305,13 @@ function loadProgress() {
 
 // Aplica os toggles de configuração salvos assim que a interface existir.
 function applySettingsToUI() {
-  const musicEl = document.getElementById("music-toggle");
-  const vibrationEl = document.getElementById("vibration-toggle");
-
   [
-    { el: musicEl, on: state.settings.music },
-    { el: vibrationEl, on: state.settings.vibration },
+    { el: document.getElementById("music-toggle"), on: state.settings.music },
+    { el: document.getElementById("vibration-toggle"), on: state.settings.vibration },
   ].forEach(({ el, on }) => {
     if (!el) return;
     el.classList.toggle("toggle-on", on);
+    el.setAttribute("aria-checked", String(on));
     const span = el.querySelector("span");
     if (span) span.classList.toggle("translate-x-5", on);
   });
