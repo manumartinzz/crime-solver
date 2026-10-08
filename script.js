@@ -628,7 +628,7 @@ function startMusic() {
     if (!music.context) {
       music.context = new AudioContext();
       music.master = music.context.createGain();
-      music.master.gain.value = 0.035;
+      music.master.gain.value = 0.12;
       music.master.connect(music.context.destination);
 
       // Acorde ambiente discreto em três camadas, adequado ao tema noir.
@@ -645,7 +645,11 @@ function startMusic() {
       });
     }
 
-    if (music.context.state === "suspended") music.context.resume();
+    if (music.context.state === "suspended") {
+      music.context.resume().catch(() => {});
+    }
+    // Restaura o volume quando o usuário liga a música novamente.
+    music.master.gain.setTargetAtTime(0.12, music.context.currentTime, 0.08);
     music.playing = true;
   } catch (error) {
     // Áudio é opcional: o jogo continua funcionando se o navegador bloquear som.
