@@ -388,3 +388,11 @@ header.safe-top {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Resposta visual imediata ao toque no celular. */
+.tap-target:active,
+.evidence-dot:active,
+.answer:active {
+  transform: scale(.97);
+}

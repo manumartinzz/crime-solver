@@ -609,6 +609,56 @@ function isUnlocked() {
 
 // Vibração curta (feedback tátil), respeitando a configuração do jogador
 // e o suporte do navegador/aparelho.
+// Música ambiente gerada com Web Audio API. Não depende de arquivo externo,
+// funciona no GitHub Pages e só começa depois de uma interação do usuário.
+const music = {
+  context: null,
+  master: null,
+  oscillators: [],
+  playing: false,
+};
+
+function startMusic() {
+  if (!state.settings.music) return;
+
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+
+    if (!music.context) {
+      music.context = new AudioContext();
+      music.master = music.context.createGain();
+      music.master.gain.value = 0.035;
+      music.master.connect(music.context.destination);
+
+      // Acorde ambiente discreto em três camadas, adequado ao tema noir.
+      [110, 164.81, 220].forEach((frequency, index) => {
+        const oscillator = music.context.createOscillator();
+        const gain = music.context.createGain();
+        oscillator.type = index === 1 ? "sine" : "triangle";
+        oscillator.frequency.value = frequency;
+        gain.gain.value = index === 0 ? 0.42 : 0.22;
+        oscillator.connect(gain);
+        gain.connect(music.master);
+        oscillator.start();
+        music.oscillators.push(oscillator);
+      });
+    }
+
+    if (music.context.state === "suspended") music.context.resume();
+    music.playing = true;
+  } catch (error) {
+    // Áudio é opcional: o jogo continua funcionando se o navegador bloquear som.
+    console.warn("Áudio indisponível neste navegador.", error);
+  }
+}
+
+function stopMusic() {
+  if (!music.context || !music.master) return;
+  music.master.gain.setTargetAtTime(0, music.context.currentTime, 0.04);
+  music.playing = false;
+}
+
 function hapticFeedback(pattern) {
   if (!state.settings.vibration) return;
   if (window.navigator && typeof window.navigator.vibrate === "function") {
@@ -1208,12 +1258,22 @@ function updateAchievements() {
 // =====================================================================
 function toggleSetting(id) {
   const el = document.getElementById(id);
+  if (!el) return;
+
   el.classList.toggle("toggle-on");
-  el.querySelector("span").classList.toggle("translate-x-5");
+  const knob = el.querySelector("span");
+  if (knob) knob.classList.toggle("translate-x-5");
   el.setAttribute("aria-checked", String(el.classList.contains("toggle-on")));
 
-  if (id === "music-toggle") state.settings.music = el.classList.contains("toggle-on");
-  if (id === "vibration-toggle") state.settings.vibration = el.classList.contains("toggle-on");
+  if (id === "music-toggle") {
+    state.settings.music = el.classList.contains("toggle-on");
+    if (state.settings.music) startMusic();
+    else stopMusic();
+  }
+  if (id === "vibration-toggle") {
+    state.settings.vibration = el.classList.contains("toggle-on");
+    if (state.settings.vibration) hapticFeedback([12, 35, 12]);
+  }
 
   saveProgress();
 }
@@ -1328,6 +1388,12 @@ function init() {
     updateProfile();
     setupModalDismiss();
     setupCarousel();
+
+    // Celulares bloqueiam áudio automático. O primeiro toque libera a trilha.
+    document.addEventListener("pointerdown", () => {
+      if (state.settings.music) startMusic();
+      hapticFeedback(8);
+    }, { passive: true });
     setTimeout(() => showView("menu-view"), 2000);
   } catch (error) {
     console.error("Falha ao iniciar o jogo:", error);
