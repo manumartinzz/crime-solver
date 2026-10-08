@@ -1,6 +1,6 @@
 // IMPORTANTE: sempre que alterar a lista de arquivos ou quiser forçar uma
 // limpeza total do cache, aumente o número da versão (v3 -> v4 -> v5...).
-const CACHE_NAME = "crime-solver-v3";
+const CACHE_NAME = "crime-solver-v4";
 
 // Arquivos pré-carregados na instalação. Cada um é tratado separadamente:
 // se algum não existir (ex.: uma foto ainda não enviada), a instalação
